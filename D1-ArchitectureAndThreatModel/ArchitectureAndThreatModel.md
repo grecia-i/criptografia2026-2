@@ -81,6 +81,21 @@ El acrónimo STRIDE desglosado significa, (S) Suplantación de identidad, (T) Ma
 | T-13 | E | El atacante modifica tokens y cambia el rol del usuario | Firmar los tokens. |
 
 ## 5. Suposiciones de confianza
+- El usuario protege sus credenciales.
+- El usuario establece contraseñas seguras y no las comparte.
+- El sistema operativo proporciona pseudo-aleatoriedad criptográficamente segura (CSPRNG) para generar llaves.
+- El sistema operativo ofrece mecanismos razonables para almacenamiento seguro.
+- Se asume que el equipo del usuario no ha sido comprometido a nivel de root o del kernel por un atacante persistente.
+- Cualquier mecanismo de backup se realiza en formato cifrado y que el usuario protege el acceso a los respaldos que haya guardado.
+- La recuperación utiliza verificación para evitar que un atacante utilice el backup como vía de acceso.
+- En el almacenamiento remoto, se asume que puede fallar o negar servicio.
+- El servidor no debe ver texto plano o llaves privadas.
+- Se asume que el usuario establece correctamente el destinatario y no con un tercero no deseado.
+- El usuario no ejecuta malware con la posibilidad de tener acceso a teclado o pantalla, y robar contraseñas o información importante.
+- El usuario no deja el dispositivo desbloqueado, y evita la posibilidad que un atacante tenga acceso a la sesión ya iniciada.
+- Una vez que el usuario descifra o abre un documento, el sistema no puede evitar que este sea copiado, fotografiado o extraído por otros medios.
+- Los algoritmos criptográficos usados son seguros y no pueden ser quebrantados con recursos computacionales realistas.
+
 
 ## 6. Análisis de superficie de ataque
 
@@ -124,3 +139,20 @@ El acrónimo STRIDE desglosado significa, (S) Suplantación de identidad, (T) Ma
     - Compromete la confidencialidad, integridad y autentificación del sistema
 
 ## 7. Restricciones de diseño
+
+| ID | Requisito | Restricción de diseño |
+|---|---|---|
+| R-1 | Confidencialidad del contenido de los archivos. | El cifrado debe ocurrir en la aplicación/CLI antes de ser almacenado o compartido. |
+| R-2 | Almacenamiento de los archivos | El servidor únicamente recibe y guarda el Vault cifrado, nunca el contenido en texto plano. |
+| R-3 | La integridad del contenido de los archivos debe ser verificable antes de mostrar el contenido | Se debe usar cifrado autenticado (AEAD) para que cualquier modificación sea detectada y de ser necesario el sistema lo rechace. |
+| R-4 | Si falla la integridad, no se muestra el contenido. | Se debe verificar la integridad antes de mostrar o usar el contenido. |
+| R-5 | Autenticidad del remitente | Se debe implementar firmas digitales para verificar que el mensaje o documento proviene del remitente que declaró ser. |
+| R-6 | Evitar suplantación de llaves públicas falsas. | El repositorio de llaves públicas debe tener un mecanismo de validación de autenticidad. |
+| R-7 | Confidencialidad de las llaves privada | Las llaves privadas deben ser almacenadas de forma temporal en un keystore cifrado, y nunca en texto plano. |
+| R-8 | Protección de llave privada por medio de contraseña. | Si se utilizan contraseñas, debe emplearse una KDF para generar una clave robusta que proteja el key store. |
+| R-9 | Los metadatos deben estar protegidos ante la manipulación no autorizada. | Los metadatos deben estar autenticados o firmados, de forma que si son alterados se pueda marcar como alterado o rechazarlo. |
+| R-10 | Protección contra rollback | Debe implementarse un mecanismo de control de versión y estado que permita detectar la sustitución del contenido por versiones anteriores no autorizadas. |
+| R-11 | Los documentos pueden ser recuperados | Debe poder hacerse backup del Vault, y al recuperarse debe verificar integridad y autenticidad. |
+| R-12 | Revocación de permiso para acceder/modificar | Debe haber rotación de llaves o cambios en ellas al modificar permisos y generar una nueva clave para cifrar la nueva versión. |
+| R-13 | Generación segura de claves | Las llaves deben generarse usando el generador de números aleatorios seguro del sistema operativo (CSPRNG) y nunca reutilizarse; cada llave debe ser única para evitar comprometer la confidencialidad y la integridad de los datos. |
+
