@@ -81,6 +81,21 @@ El acrónimo STRIDE desglosado significa, (S) Suplantación de identidad, (T) Ma
 | T-13 | E | El atacante modifica tokens y cambia el rol del usuario | Firmar los tokens. |
 
 ## 5. Suposiciones de confianza
+- El usuario protege sus credenciales.
+- El usuario establece contraseñas seguras y no las comparte.
+- El sistema operativo proporciona pseudo-aleatoriedad criptográficamente segura (CSPRNG) para generar llaves.
+- El sistema operativo ofrece mecanismos razonables para almacenamiento seguro.
+- Se asume que el equipo del usuario no ha sido comprometido a nivel de root o del kernel por un atacante persistente.
+- Cualquier mecanismo de backup se realiza en formato cifrado y que el usuario protege el acceso a los respaldos que haya guardado.
+- La recuperación utiliza verificación para evitar que un atacante utilice el backup como vía de acceso.
+- En el almacenamiento remoto, se asume que puede fallar o negar servicio.
+- El servidor no debe ver texto plano o llaves privadas.
+- Se asume que el usuario establece correctamente el destinatario y no con un tercero no deseado.
+- El usuario no ejecuta malware con la posibilidad de tener acceso a teclado o pantalla, y robar contraseñas o información importante.
+- El usuario no deja el dispositivo desbloqueado, y evita la posibilidad que un atacante tenga acceso a la sesión ya iniciada.
+- Una vez que el usuario descifra o abre un documento, el sistema no puede evitar que este sea copiado, fotografiado o extraído por otros medios.
+- Los algoritmos criptográficos usados son seguros y no pueden ser quebrantados con recursos computacionales realistas.
+
 
 ## 6. Análisis de superficie de ataque
 
