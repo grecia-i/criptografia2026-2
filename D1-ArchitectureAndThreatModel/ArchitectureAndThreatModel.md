@@ -140,19 +140,19 @@ El acrónimo STRIDE desglosado significa, (S) Suplantación de identidad, (T) Ma
 
 ## 7. Restricciones de diseño
 
-| Requisito | Restricción de diseño |
-|---|---|
-| Confidencialidad del contenido de los archivos. | El cifrado debe ocurrir en la aplicación/CLI antes de ser almacenado o compartido. |
-| Almacenamiento de los archivos | El servidor únicamente recibe y guarda el Vault cifrado, nunca el contenido en texto plano. |
-| La integridad del contenido de los archivos debe ser verificable antes de mostrar el contenido | Se debe usar cifrado autenticado (AEAD) para que cualquier modificación sea detectada y de ser necesario el sistema lo rechace. |
-| Si falla la integridad, no se muestra el contenido. | Se debe verificar la integridad antes de mostrar o usar el contenido. |
-| Autenticidad del remitente | Se debe implementar firmas digitales para verificar que el mensaje o documento proviene del remitente que declaró ser. |
-| Evitar suplantación de llaves públicas falsas. | El repositorio de llaves públicas debe tener un mecanismo de validación de autenticidad. |
-| Confidencialidad de las llaves privada | Las llaves privadas deben ser almacenadas de forma temporal en un keystore cifrado, y nunca en texto plano. |
-| Protección de llave privada por medio de contraseña. | Si se utilizan contraseñas, debe emplearse una KDF para generar una clave robusta que proteja el key store. |
-| Los metadatos deben estar protegidos ante la manipulación no autorizada. | Los metadatos deben estar autenticados o firmados, de forma que si son alterados se pueda marcar como alterado o rechazarlo. |
-| Protección contra rollback | Debe implementarse un mecanismo de control de versión y estado que permita detectar la sustitución del contenido por versiones anteriores no autorizadas. |
-| Los documentos pueden ser recuperados | Debe poder hacerse backup del Vault, y al recuperarse debe verificar integridad y autenticidad. |
-| Revocación de permiso para acceder/modificar | Debe haber rotación de llaves o cambios en ellas al modificar permisos y generar una nueva clave para cifrar la nueva versión. |
-| Generación segura de claves | Las llaves deben generarse usando el generador de números aleatorios seguro del sistema operativo (CSPRNG) y nunca reutilizarse; cada llave debe ser única para evitar comprometer la confidencialidad y la integridad de los datos. |
+| ID | Requisito | Restricción de diseño |
+|---|---|---|
+| R-1 | Confidencialidad del contenido de los archivos. | El cifrado debe ocurrir en la aplicación/CLI antes de ser almacenado o compartido. |
+| R-2 | Almacenamiento de los archivos | El servidor únicamente recibe y guarda el Vault cifrado, nunca el contenido en texto plano. |
+| R-3 | La integridad del contenido de los archivos debe ser verificable antes de mostrar el contenido | Se debe usar cifrado autenticado (AEAD) para que cualquier modificación sea detectada y de ser necesario el sistema lo rechace. |
+| R-4 | Si falla la integridad, no se muestra el contenido. | Se debe verificar la integridad antes de mostrar o usar el contenido. |
+| R-5 | Autenticidad del remitente | Se debe implementar firmas digitales para verificar que el mensaje o documento proviene del remitente que declaró ser. |
+| R-6 | Evitar suplantación de llaves públicas falsas. | El repositorio de llaves públicas debe tener un mecanismo de validación de autenticidad. |
+| R-7 | Confidencialidad de las llaves privada | Las llaves privadas deben ser almacenadas de forma temporal en un keystore cifrado, y nunca en texto plano. |
+| R-8 | Protección de llave privada por medio de contraseña. | Si se utilizan contraseñas, debe emplearse una KDF para generar una clave robusta que proteja el key store. |
+| R-9 | Los metadatos deben estar protegidos ante la manipulación no autorizada. | Los metadatos deben estar autenticados o firmados, de forma que si son alterados se pueda marcar como alterado o rechazarlo. |
+| R-10 | Protección contra rollback | Debe implementarse un mecanismo de control de versión y estado que permita detectar la sustitución del contenido por versiones anteriores no autorizadas. |
+| R-11 | Los documentos pueden ser recuperados | Debe poder hacerse backup del Vault, y al recuperarse debe verificar integridad y autenticidad. |
+| R-12 | Revocación de permiso para acceder/modificar | Debe haber rotación de llaves o cambios en ellas al modificar permisos y generar una nueva clave para cifrar la nueva versión. |
+| R-13 | Generación segura de claves | Las llaves deben generarse usando el generador de números aleatorios seguro del sistema operativo (CSPRNG) y nunca reutilizarse; cada llave debe ser única para evitar comprometer la confidencialidad y la integridad de los datos. |
 
