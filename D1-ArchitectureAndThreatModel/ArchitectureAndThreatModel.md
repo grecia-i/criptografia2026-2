@@ -33,9 +33,10 @@
     - El uso de algoritmos de cifrado inseguros, posiblemente implementados para mantener compatibilidad con hardware viejo, pueden ser atacados por vulnerabilidades conocidas revelando secretos como el contenido de los archivos almacenados o las llaves privadas.
     - Compromete la confidencialidad e integridad de los contenidos y el no repudio al permitir el uso de llaves privadas por un usuario no autorizado.
 
-- Repositorio de llaves publicas
+- Repositorio de llaves públicas
 
     - Puede ser objetivo de ataques de sustitución de las llaves originales o las llaves pueden ser interceptadas en tránsito, el uso insuficiente o la omisión de cifrado en el almacenamiento de las llaves podría exponer el sistema a fallos de verificación de la identidad de los autores de los archivos. 
+    - Compromete la autentificación de la información. 
 
 - Verificación de firmas
     - La implementación incorrecta de la verificación de firmas o una implementación débil de esta puede llevar a que se acepten archivos provenientes de usuarios maliciosos.
