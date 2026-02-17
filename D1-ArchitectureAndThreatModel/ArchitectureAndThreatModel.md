@@ -1,6 +1,26 @@
 # Arquitectura y análisis de amenazas
 
 ## 1. Descripción del sistema
+¿Qué problema resuelve tu bóveda?
+
+En un mundo moderno que avanza cada día más hacia la digitalización, globalización y automatización de procesos, ha surgido la necesidad de contar con documentos personales de manera digital para su uso, incluso a veces de forma inmediata. 
+En la vida real, las personas cuentan con algún espacio donde mantener los documentos especiales en un mismo lugar, séase un folder, un archivero, entre otros. La bóveda entonces funcionará análogamente a este proceso, pues será diseñada para contener cierta cantidad de archivos de manera centralizada e impedir que personas no autorizadas lean, copien, alteren o extraigan información de los documentos, con la facilidad de compartirlos de manera que no queden expuestos y contar con una trazabilidad acerca de quién crea y quién tiene acceso a los documentos.
+
+
+¿Cuáles son las características principales?
+
+Los archivos se almacenarán y mantendrán cifrados para evitar acceso sin autorización.
+La bóveda incorporará mecanismos para la autenticación y verificación de usuario. 
+El usuario podrá acceder a los documentos cuando los requiera.
+Se protegen las llaves privadas y se gestiona su uso de forma controlada, aplicando medidas como almacenamiento seguro, cifrado y caducidad de llaves.
+Se contempla un mecanismo de backup para las llaves para evitar que el usuario pierda acceso en caso de olvido de credencial o pérdida de acceso al dispositivo. Se podrá recuperar al cumplir los requisitos de verificación.
+La bóveda incorporará mecanismos que permitan detectar la modificación de los archivos, verificando su integridad y autenticidad, de modo que sea posible identificar si el contenido fue alterado y confirmar quién realizó el último cambio.
+
+
+¿Qué está explícitamente fuera del alcance?
+
+El sistema se enfoca en la seguridad digital de los archivos y llaves privadas mediante mecanismos de cifrado y autentificación, como está planteado en este documento no puede proteger contra ataques de ingeniería social o descuidos del usuario con respecto a la privacidad de las credenciales con las que ingresará al sistema.
+El sistema busca garantizar la seguridad computacional de los archivos almacenados ante atacantes con capacidad de cómputo acotada, no entra en el alcance del proyecto implementar algoritmos post-cuánticos o considerando capacidades de cómputo infinitas, tampoco se garantiza la seguridad física de la información en caso de algún desastre natural, accidente o ataque malicioso
 
 ## 2. Arquitectura del sistema
 ![Modelo de Arquitectura](Arquitectura-D1.jpg)
