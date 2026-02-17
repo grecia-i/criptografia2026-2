@@ -3,6 +3,7 @@
 ## 1. Descripción del sistema
 
 ## 2. Arquitectura del sistema
+![Modelo de Arquitectura](Arquitectura-D1.jpg)
 
 ## 3. Requerimientos de seguridad
 
