@@ -20,6 +20,7 @@ def build_parser():
     )
 
 
+
     decrypt_parser = subparsers.add_parser(
         "decrypt",
         help="Decrypt a vault container"
