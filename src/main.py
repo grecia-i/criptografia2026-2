@@ -16,13 +16,13 @@ def main():
     args = parser.parse_args()
     print(args)
     
-    if os.path.isfile(KEY_PATH):
-        key=read_key(KEY_PATH)
-        print("Key read from file, key is: \n", key.hex()) #debug
-    else:
-        key = generate_key()
-        write_key(KEY_PATH,key)
-        print("New key generated, key is: \n", key.hex()) #debug
+    #Una llave para todos los archivos
+    # if os.path.isfile(KEY_PATH):
+    #     key=read_key(KEY_PATH)
+    #     print("Key read from file, key is: \n", key.hex()) #debug
+    # else:
+    #     key = generate_key()
+    #     print("New key generated, key is: \n", key.hex()) #debug
 
 
     if(args.command == "encrypt"):
@@ -33,13 +33,27 @@ def main():
 
         vault_container = os.path.join(VAULT_PATH, file_name)
         print("Vault container = ", vault_container) #debug
+
+        key = generate_key()
+        print("New key generated, key is: \n", key.hex()) #debug
+        
         encrypt_file(file_name, vault_container, key)
 
 
     elif(args.command =="decrypt"):
+
         vault_container = args.container_dir
+
         if os.path.isdir(vault_container):
-            decrypt_container(vault_container, args.output_file, key)
+            key_path = os.path.join(vault_container,"key","priv.key")
+            if(os.path.isfile(key_path)):
+                key = read_key(key_path)
+                print("read key is :",key.hex()) #debug
+
+                decrypt_container(vault_container, args.output_file, key)
+        else:
+            print(f"ERROR: Container {vault_container} does not exist")
+            return
 
 
         

@@ -16,12 +16,16 @@ def read_key(path):
         key=key_file.read()
     return key
 
-def write_key(path,key):
-    with open(path,"wb") as key_file:
+def write_key(vault_path,key):
+    key_path = os.path.join(vault_path,"key")
+    os.makedirs(key_path,exist_ok=True)
+    
+    with open(os.path.join(key_path,"priv.key"),"wb") as key_file:
         key_file.write(key)
 
 def encrypt_file(input_file, vault_dir, key):
     os.makedirs(vault_dir, exist_ok=True)
+    write_key(vault_dir,key)
 
     with open(input_file, "rb") as f:
         plaintext = f.read()

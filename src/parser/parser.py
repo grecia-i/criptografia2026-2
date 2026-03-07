@@ -37,9 +37,5 @@ def build_parser():
         type=str,
         help="Recovered plaintext file"
     )
-    args = parser.parse_args()
 
     return parser
-
-
-#args = parser.parse_args()
