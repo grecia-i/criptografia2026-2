@@ -16,6 +16,7 @@ def main():
     else:
         file_name = args.f
 
+
     if not (os.path.exists(file_name)):
         print(f"ERROR, {file_name} does not exist")
         return

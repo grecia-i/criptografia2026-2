@@ -10,7 +10,6 @@ SUPPORTED_ALGORITHMS = "AES-256-GCM"
 
 def generate_key():
     return AESGCM.generate_key(256)
-    #return secrets.token_bytes(KEY_SIZE)
 
 def read_key(path):
     with open(path,"rb") as key_file:
@@ -38,17 +37,6 @@ def encrypt_file(input_file, vault_dir, key):
 
     header_bytes = json.dumps(header).encode()
 
-    # cipher = Cipher(
-    #     algorithms.AES(key),
-    #     modes.GCM(nonce)
-    # )
-
-    # encryptor = cipher.encryptor()
-
-    # encryptor.authenticate_additional_data(header_bytes)
-
-    #ciphertext = encryptor.update(plaintext) + encryptor.finalize()
-    #tag = encryptor.tag
     aesgcm = AESGCM(key)
     ciphertext = aesgcm.encrypt(nonce,plaintext,header_bytes)
     tag = ciphertext[-16:]
