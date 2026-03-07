@@ -1,12 +1,16 @@
 import os
 import json
 import secrets
+from datetime import datetime # for the timestamp
+import zoneinfo
+import tzlocal # timestamp + timezone
+import uuid # rand id generation
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 KEY_SIZE = 256
 NONCE_SIZE = 12
 SUPPORTED_ALGORITHMS = "AES-256-GCM"
-
+TIMEZONE = tzlocal.get_localzone()
 
 def generate_key():
     return AESGCM.generate_key(KEY_SIZE)
@@ -36,10 +40,15 @@ def encrypt_file(input_file, vault_dir, key):
         "algorithm": SUPPORTED_ALGORITHMS,
         "nonce_size": NONCE_SIZE*8,
         "file_name": os.path.basename(input_file),
-        "key_length": KEY_SIZE
+        "file_size": os.path.getsize(input_file),
+        "key_length": KEY_SIZE,
+        "time_creation": datetime.now(TIMEZONE).isoformat()
+        # the owner id NEEDS TO BE CHANGED to be generated while creating an user -> storaged
+        # "owner_id": str(uuid.uuid4), # random UUID in a cryptographically-secure method according to RFC 9562, §5.4.
+        # "file_id": str(uuid.uuid4)
     }
 
-    header_bytes = json.dumps(header).encode()
+    header_bytes = json.dumps(header, sort_keys=True).encode()
 
     aesgcm = AESGCM(key)
     ciphertext = aesgcm.encrypt(nonce,plaintext,header_bytes)
