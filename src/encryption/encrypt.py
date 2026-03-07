@@ -9,7 +9,7 @@ SUPPORTED_ALGORITHMS = "AES-256-GCM"
 
 
 def generate_key():
-    return AESGCM.generate_key(256)
+    return AESGCM.generate_key(KEY_SIZE)
 
 def read_key(path):
     with open(path,"rb") as key_file:
