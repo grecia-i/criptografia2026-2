@@ -49,10 +49,12 @@ El programa desarrollado solicita una contraseña para cifrar el archivo y poste
 
 Para esta prueba se eligió una contraseña específica durante el proceso de cifrado. Sin embargo, al intentar descifrar el archivo se ingresó una contraseña diferente.
 
-Como resultado, el sistema generó un bloqueo. Esto ocurrió porque, al intentar descifrar el archivo utilizando una clave incorrecta, el algoritmo AES-GCM detectó que los datos no eran auténticos. En consecuencia, la librería lanzó la excepción cryptography.exceptions.InvalidTag.
+Como resultado, el sistema generó un bloqueo. Esto ocurrió porque, al intentar descifrar el archivo utilizando una clave incorrecta, el algoritmo AES-GCM detectó que los datos no eran auténticos.
 
 Esto sucede porque, al usar una clave incorrecta, el código de autenticación resultante (TAG) no coincide con el TAG esperado, lo que indica que la autenticación del mensaje ha fallado y evita que se genere cualquier salida de texto plano.
-<img width="1249" height="755" alt="Screenshot From 2026-03-07 22-09-44" src="https://github.com/user-attachments/assets/8bbffa60-14e0-4952-92b5-fbbdf6347324" />
+<img width="1241" height="218" alt="Screenshot From 2026-03-07 23-04-02" src="https://github.com/user-attachments/assets/d835378f-c087-4d95-9a44-67cf6cf1bbc1" />
+
+
 
 2. Prueba de inyección de errores
 
@@ -64,7 +66,9 @@ Una vez realizada esta modificación, al intentar ejecutar el proceso de descifr
 
 
 Como resultado, el sistema detuvo el proceso de descifrado de manera inmediata, antes de producir cualquier salida de texto plano. Esto confirma que el mecanismo de autenticación e integridad del cifrado detecta correctamente modificaciones maliciosas en el archivo cifrado.
-<img width="1500" height="854" alt="image" src="https://github.com/user-attachments/assets/33eddc76-0059-42d3-a64b-a7ace8e261c1" />
+<img width="1514" height="353" alt="Screenshot From 2026-03-07 23-02-36" src="https://github.com/user-attachments/assets/c822ba19-7bbe-40b9-840a-d235b5dc6e7a" />
+
+
 
 3. Prueba de modificación de metadatos
 
@@ -72,8 +76,10 @@ En esta prueba se realizaron cambios en el archivo header.json. Este archivo con
 
 Durante el descifrado, el algoritmo utiliza el contenido del archivo JSON como datos asociados para verificar el TAG de autenticación. Sin embargo, debido a que el archivo header.json ya no es idéntico al que existía en el momento del cifrado, el cálculo del TAG no coincide con el valor original.
 
-Como consecuencia, la librería detecta que los datos asociados han sido modificados, lo que provoca que se lance la excepción cryptography.exceptions.InvalidTag. Esto impide que el proceso de descifrado continúe y protege la integridad de la información.
-<img width="1208" height="534" alt="image" src="https://github.com/user-attachments/assets/ecb509ef-e992-4275-9079-8fd860343ac8" />
+Como consecuencia, la librería detecta que los datos asociados han sido modificados. Esto impide que el proceso de descifrado continúe y protege la integridad de la información.
+<img width="1208" height="237" alt="Screenshot From 2026-03-07 23-08-04" src="https://github.com/user-attachments/assets/9e3ccdbf-84c1-491a-8888-9446e6619128" />
+
+
 
 4. Prueba de consistencia del cifrado y descifrado
 
