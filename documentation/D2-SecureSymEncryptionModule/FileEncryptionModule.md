@@ -1,5 +1,12 @@
 # D2 - Secure Symmetric Encryption Module
 
+Contribuyentes:
+
+- Castillo Soto Jacqueline,
+- Meneses Calderas Grecia Irais,
+- Pérez Osorio Luis Eduardo,
+- Rivas Gil María Lucía.
+
 ## Diseño del cifrado
 
 ### Algoritmo de AEAD
