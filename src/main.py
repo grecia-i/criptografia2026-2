@@ -2,7 +2,7 @@ import os
 import getpass
 import secrets
 from encryption.encrypt import encrypt_file
-from decryption.decrypt import decrypt_container
+from encryption.decrypt import decrypt_container
 from derivation.pw_derivation import derive_key, write_salt, read_salt
 from parser.parser import build_parser
 
