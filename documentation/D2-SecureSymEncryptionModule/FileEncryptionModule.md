@@ -1,16 +1,12 @@
-Encryption Design Section
+# D2 - Secure Symmetric Encryption Module
 
-Explain:
+- Selected AEAD algorithm
+- Key size
+- Nonce strategy
+- Metadata authentication strategy
 
-    Selected AEAD algorithm
-    Key size
-    Nonce strategy
-    Metadata authentication strategy
+## Security Decisions
 
-Security Decisions
-
-Answer explicitly:
-
-    Why AEAD instead of encryption + hash?
-    What happens if nonce repeats?
-    What attacker are you defending against?
+- Why AEAD instead of encryption + hash?
+- What happens if nonce repeats?
+- What attacker are you defending against?
