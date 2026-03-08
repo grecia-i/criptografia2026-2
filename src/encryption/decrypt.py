@@ -55,7 +55,7 @@ def decrypt_key(header_bytes, container_dir, master_key):
         decrypted_key = aesgcm.decrypt(nonce, encrypted_key, header_bytes)
     except InvalidTag:
         raise ValueError(
-            "Authentication failed: password may be incorrect or the encrypted key may have been tampered with"
+            "Authentication failed: password may be incorrect or the encrypted files may have been tampered with"
         )
 
     return decrypted_key
