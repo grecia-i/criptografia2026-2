@@ -6,7 +6,12 @@ from cryptography.exceptions import InvalidTag
 SUPPORTED_ALGORITHMS = "AES-256-GCM"
 
 
-def decrypt_container(container_dir, output_file, key):
+def read_key(path):
+    with open(path,"rb") as key_file:
+        key=key_file.read()
+    return key
+
+def decrypt_container(container_dir, output_file, master_key):
 
     with open(os.path.join(container_dir, "header.json"), "rb") as f:
         header_bytes = f.read()
@@ -22,6 +27,8 @@ def decrypt_container(container_dir, output_file, key):
     with open(os.path.join(container_dir, "ciphertext"), "rb") as f:
         ciphertext = f.read()
 
+    key=decrypt_key(header_bytes,container_dir,master_key)
+
     aesgcm = AESGCM(key)
 
     try:
@@ -31,3 +38,25 @@ def decrypt_container(container_dir, output_file, key):
 
     with open(output_file, "wb") as f:
         f.write(plaintext)
+
+def decrypt_key(header_bytes,container_dir,master_key):
+    key_path = os.path.join(container_dir,"file.key")
+    encrypted_key = read_key(key_path)
+
+    with open(os.path.join(container_dir, "key_nonce"), "rb") as f:
+        nonce = f.read()
+
+    # print("DECRYPT, ENCRYPTED KEY: ",encrypted_key.hex())
+    # print("DECRYPT, NONCE: ",nonce.hex())
+    aesgcm = AESGCM(master_key)
+
+    try:
+        decrypted_key = aesgcm.decrypt(nonce,encrypted_key,header_bytes)
+    except InvalidTag:
+        raise ValueError("Integrity verification failed: Passwork may be incorrect file or key may be tampered")
+
+    return decrypted_key
+
+
+
+
