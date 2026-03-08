@@ -24,7 +24,6 @@ def write_key(vault_path,key):
 def encrypt_file(input_file, vault_dir,master_key):
 
     key = generate_key()
-    print("New key generated, key is: \n", key.hex()) #debug
 
     os.makedirs(vault_dir, exist_ok=True)
     #write_key(vault_dir,key)
@@ -53,11 +52,8 @@ def encrypt_file(input_file, vault_dir,master_key):
     
 
     tag = ciphertext[-16:]
-    print("CT= ",ciphertext.hex())  #debug
-    print("TAG= ",tag.hex()) #debug
 
     encrypted_key = encrypt_key(key,master_key,header_bytes,vault_dir)
-    print("Encrypted key is: \n",encrypted_key.hex())  #debug
     write_key(vault_dir,encrypted_key)
 
     with open(os.path.join(vault_dir, "header.json"), "wb") as f:

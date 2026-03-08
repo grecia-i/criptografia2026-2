@@ -2,11 +2,14 @@ import argparse
 
 def build_parser():
     parser = argparse.ArgumentParser(
-        description="Secure vault file encryption tool"
+        description="Secure Digital Document Vault CLI"
     )
 
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
+    subparsers = parser.add_subparsers(
+        dest="command",
+        required=True,
+        help="Available commands"
+    )
 
     encrypt_parser = subparsers.add_parser(
         "encrypt",
@@ -18,8 +21,6 @@ def build_parser():
         type=str,
         help="File to encrypt"
     )
-
-
 
     decrypt_parser = subparsers.add_parser(
         "decrypt",
@@ -35,7 +36,7 @@ def build_parser():
     decrypt_parser.add_argument(
         "output_file",
         type=str,
-        help="Recovered plaintext file"
+        help="Path where the recovered plaintext file will be written"
     )
 
     return parser
