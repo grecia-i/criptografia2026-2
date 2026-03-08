@@ -7,12 +7,12 @@ SUPPORTED_ALGORITHMS = "AES-256-GCM"
 
 
 def read_key(path):
-    with open(path,"rb") as key_file:
-        key=key_file.read()
+    with open(path, "rb") as key_file:
+        key = key_file.read()
     return key
 
-def decrypt_container(container_dir, output_file, master_key):
 
+def decrypt_container(container_dir, output_file, master_key):
     with open(os.path.join(container_dir, "header.json"), "rb") as f:
         header_bytes = f.read()
 
@@ -27,56 +27,35 @@ def decrypt_container(container_dir, output_file, master_key):
     with open(os.path.join(container_dir, "ciphertext"), "rb") as f:
         ciphertext = f.read()
 
-    key=decrypt_key(header_bytes,container_dir,master_key)
+    key = decrypt_key(header_bytes, container_dir, master_key)
 
     aesgcm = AESGCM(key)
 
     try:
-        plaintext = aesgcm.decrypt(nonce,ciphertext,header_bytes)
+        plaintext = aesgcm.decrypt(nonce, ciphertext, header_bytes)
     except InvalidTag:
-        raise ValueError("Authentication failed: container contents or metadata may have been tampered with")
+        raise ValueError(
+            "Authentication failed: container contents or metadata may have been tampered with"
+        )
 
     with open(output_file, "wb") as f:
         f.write(plaintext)
 
-def decrypt_key(header_bytes,container_dir,master_key):
-    key_path = os.path.join(container_dir,"file.key")
+
+def decrypt_key(header_bytes, container_dir, master_key):
+    key_path = os.path.join(container_dir, "file.key")
     encrypted_key = read_key(key_path)
 
     with open(os.path.join(container_dir, "key_nonce"), "rb") as f:
         nonce = f.read()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    # print("DECRYPT, ENCRYPTED KEY: ",encrypted_key.hex())
-    # print("DECRYPT, NONCE: ",nonce.hex())
->>>>>>> 07ab387099b24ea936de4f47910cf10c90686722
-=======
-    # print("DECRYPT, ENCRYPTED KEY: ",encrypted_key.hex())
-    # print("DECRYPT, NONCE: ",nonce.hex())
->>>>>>> 07ab387099b24ea936de4f47910cf10c90686722
     aesgcm = AESGCM(master_key)
 
     try:
-        decrypted_key = aesgcm.decrypt(nonce,encrypted_key,header_bytes)
+        decrypted_key = aesgcm.decrypt(nonce, encrypted_key, header_bytes)
     except InvalidTag:
-<<<<<<< HEAD
-<<<<<<< HEAD
-        raise ValueError("Authentication failed: password may be incorrect or the encrypted key may have been tampered with")
+        raise ValueError(
+            "Authentication failed: password may be incorrect or the encrypted key may have been tampered with"
+        )
 
     return decrypted_key
-
-
-
-
-=======
-        raise ValueError("Integrity verification failed: Passwork may be incorrect file or key may be tampered")
-
-    return decrypted_key
->>>>>>> 07ab387099b24ea936de4f47910cf10c90686722
-=======
-        raise ValueError("Integrity verification failed: Passwork may be incorrect file or key may be tampered")
-
-    return decrypted_key
->>>>>>> 07ab387099b24ea936de4f47910cf10c90686722
