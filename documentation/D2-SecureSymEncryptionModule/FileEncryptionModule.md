@@ -39,3 +39,56 @@ Además de esto la reutilización de un nonce y una llave privada permite a un a
 El sistema está diseñado para proteger contra un atacante que puede acceder a y manipular los archivos cifrados almacenados en la bóveda, se considera que un atacante podría intentar leer y alterar el texto cifrado, alterar los metadatos o reemplazar partes del contenedor para burlar los mecanismos de autentificación, confidencialidad e integridad.
 
 Esta implementación asume que el atacante tiene acceso a los archivos de documentos cifrados, pero no conoce la contraseña del usuario o la llave derivada de esta.
+
+
+## Pruebas de Seguridad
+
+1. Prueba de autenticación
+
+El programa desarrollado solicita una contraseña para cifrar el archivo y posteriormente requiere la misma contraseña para realizar el descifrado del archivo ya cifrado.
+
+Para esta prueba se eligió una contraseña específica durante el proceso de cifrado. Sin embargo, al intentar descifrar el archivo se ingresó una contraseña diferente.
+
+Como resultado, el sistema generó un bloqueo. Esto ocurrió porque, al intentar descifrar el archivo utilizando una clave incorrecta, el algoritmo AES-GCM detectó que los datos no eran auténticos. En consecuencia, la librería lanzó la excepción cryptography.exceptions.InvalidTag.
+
+Esto sucede porque, al usar una clave incorrecta, el código de autenticación resultante (TAG) no coincide con el TAG esperado, lo que indica que la autenticación del mensaje ha fallado y evita que se genere cualquier salida de texto plano.
+<img width="1249" height="755" alt="Screenshot From 2026-03-07 22-09-44" src="https://github.com/user-attachments/assets/8bbffa60-14e0-4952-92b5-fbbdf6347324" />
+
+2. Prueba de inyección de errores
+
+Para esta prueba se realizó la inyección de bits basura en un archivo cifrado. En este caso, el archivo hola.txt contenía información sensible: "Información súper secreta".
+
+Después de cifrarlo correctamente, se utilizó el comando dd para sobrescribir el offset 10 del archivo ciphertext con el valor hexadecimal \xff.
+
+Una vez realizada esta modificación, al intentar ejecutar el proceso de descifrado se generó una excepción de tipo cryptography.exceptions.InvalidTag. Esto significa que, durante el descifrado, el algoritmo recalculó el código de autenticación y detectó que no coincidía con el TAG original almacenado al final del archivo.
+
+
+Como resultado, el sistema detuvo el proceso de descifrado de manera inmediata, antes de producir cualquier salida de texto plano. Esto confirma que el mecanismo de autenticación e integridad del cifrado detecta correctamente modificaciones maliciosas en el archivo cifrado.
+<img width="1500" height="854" alt="image" src="https://github.com/user-attachments/assets/33eddc76-0059-42d3-a64b-a7ace8e261c1" />
+
+3. Prueba de modificación de metadatos
+
+En esta prueba se realizaron cambios en el archivo header.json. Este archivo contiene la información de los metadatos del archivo cifrado. La modificación se efectuó antes de intentar el proceso de descifrado.
+
+Durante el descifrado, el algoritmo utiliza el contenido del archivo JSON como datos asociados para verificar el TAG de autenticación. Sin embargo, debido a que el archivo header.json ya no es idéntico al que existía en el momento del cifrado, el cálculo del TAG no coincide con el valor original.
+
+Como consecuencia, la librería detecta que los datos asociados han sido modificados, lo que provoca que se lance la excepción cryptography.exceptions.InvalidTag. Esto impide que el proceso de descifrado continúe y protege la integridad de la información.
+<img width="1208" height="534" alt="image" src="https://github.com/user-attachments/assets/ecb509ef-e992-4275-9079-8fd860343ac8" />
+
+4. Prueba de consistencia del cifrado y descifrado
+
+Esta prueba tiene como objetivo verificar que no se pierda ni se modifique información durante los procesos de cifrado y descifrado. Se espera que el contenido del archivo original sea exactamente el mismo que el obtenido después de descifrar el archivo previamente cifrado.
+
+Para realizar la prueba se utilizó el archivo Ciframe.txt, cuyo contenido era "HOLA DESCÍFRAME". Posteriormente, se cifró el archivo y luego se realizó el proceso de descifrado. El resultado del descifrado se guardó en un archivo llamado salida.txt.
+
+Al revisar el contenido del archivo salida.txt, se observó que la información coincide completamente con el contenido original, lo que confirma que el proceso de cifrado y descifrado no produjo modificaciones ni pérdida de datos.
+<img width="1221" height="533" alt="image" src="https://github.com/user-attachments/assets/f0ac9d25-5eb6-4819-b147-b826a8c06bd0" />
+
+5. Prueba de Cifrados diferentes
+
+Aunque se cifre el mismo archivo 100 veces, no debería generarse la misma salida de cifrado en cada ocasión. Esto se debe al uso de un nonce, que modifica el estado inicial del algoritmo y garantiza que el texto cifrado resultante sea diferente en cada ejecución.
+
+De esta manera se evita la aparición de patrones en los datos cifrados, lo que fortalece la seguridad del sistema. Además, los algoritmos criptográficos modernos presentan el llamado efecto avalancha, lo que significa que si se modifica incluso un solo bit en la entrada, más de la mitad de los bits del resultado final cambian, produciendo un cifrado completamente distinto.
+
+<img width="1085" height="737" alt="image" src="https://github.com/user-attachments/assets/eae02b86-46fb-4cb2-8c72-1f7a9a033457" />
+
