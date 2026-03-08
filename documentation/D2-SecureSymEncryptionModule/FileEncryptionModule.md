@@ -80,7 +80,7 @@ Como consecuencia, la librería detecta que los datos asociados han sido modific
 <img width="1208" height="237" alt="Screenshot From 2026-03-07 23-08-04" src="https://github.com/user-attachments/assets/9e3ccdbf-84c1-491a-8888-9446e6619128" />
 
 
-#Para las siguientes pruebas se imprimieron algunas variables de depuracion para mostrar mejor el comportamiento.
+PARA LAS SIGUIENTES PRUEBAS SE IMPRIMIERON ALGUNAS VARIABLES DE DEPURACION PARA MOSTRAR MEJOR EL COMPORTAMIENTO
 
 4. Prueba de consistencia del cifrado y descifrado
 
