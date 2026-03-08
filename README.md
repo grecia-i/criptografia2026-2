@@ -1,4 +1,11 @@
-# Digital Vault
-Project for the Cryptography class
+# Bóveda Digital
 
-The main objective of the system is to protect, share, and verify digital documents using modern applied cryptographic techniques. It should allow users to encrypt files, share them securely with selected recipients, verify authenticity, and manage their cryptographic keys responsibly.
+Proyecto para la clase de Criptografía
+
+El objetivo principal del sistema es proteger, compartir y verificar documentos digitales mediante técnicas criptográficas modernas. Debe permitir a los usuarios cifrar archivos, compartirlos de forma segura con destinatarios seleccionados, verificar su autenticidad y gestionar sus claves criptográficas de forma responsable.
+
+Contribuyentes:
+- Castillo Soto Jacqueline, 
+- Meneses Calderas Grecia Irais, 
+- Pérez Osorio Luis Eduardo, 
+- Rivas Gil María Lucía.
