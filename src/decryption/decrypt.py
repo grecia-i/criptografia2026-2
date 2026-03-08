@@ -46,11 +46,17 @@ def decrypt_key(header_bytes,container_dir,master_key):
     with open(os.path.join(container_dir, "key_nonce"), "rb") as f:
         nonce = f.read()
 
+<<<<<<< HEAD
+=======
+    # print("DECRYPT, ENCRYPTED KEY: ",encrypted_key.hex())
+    # print("DECRYPT, NONCE: ",nonce.hex())
+>>>>>>> 07ab387099b24ea936de4f47910cf10c90686722
     aesgcm = AESGCM(master_key)
 
     try:
         decrypted_key = aesgcm.decrypt(nonce,encrypted_key,header_bytes)
     except InvalidTag:
+<<<<<<< HEAD
         raise ValueError("Authentication failed: password may be incorrect or the encrypted key may have been tampered with")
 
     return decrypted_key
@@ -58,3 +64,8 @@ def decrypt_key(header_bytes,container_dir,master_key):
 
 
 
+=======
+        raise ValueError("Integrity verification failed: Passwork may be incorrect file or key may be tampered")
+
+    return decrypted_key
+>>>>>>> 07ab387099b24ea936de4f47910cf10c90686722
