@@ -1,0 +1,1 @@
+{"algorithm": "AES-256-GCM", "file_name": "prueba.txt", "file_size": 28, "key_length": 256, "nonce_size": 96, "time_creation": "2026-03-07T21:14:44.035421-06:00"}

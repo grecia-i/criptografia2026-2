@@ -34,7 +34,7 @@ def decrypt_container(container_dir, output_file, master_key):
     try:
         plaintext = aesgcm.decrypt(nonce,ciphertext,header_bytes)
     except InvalidTag:
-        raise ValueError("Integrity verification failed: container may be tampered")
+        raise ValueError("Authentication failed: container contents or metadata may have been tampered with")
 
     with open(output_file, "wb") as f:
         f.write(plaintext)
@@ -46,14 +46,12 @@ def decrypt_key(header_bytes,container_dir,master_key):
     with open(os.path.join(container_dir, "key_nonce"), "rb") as f:
         nonce = f.read()
 
-    # print("DECRYPT, ENCRYPTED KEY: ",encrypted_key.hex())
-    # print("DECRYPT, NONCE: ",nonce.hex())
     aesgcm = AESGCM(master_key)
 
     try:
         decrypted_key = aesgcm.decrypt(nonce,encrypted_key,header_bytes)
     except InvalidTag:
-        raise ValueError("Integrity verification failed: Passwork may be incorrect file or key may be tampered")
+        raise ValueError("Authentication failed: password may be incorrect or the encrypted key may have been tampered with")
 
     return decrypted_key
 
