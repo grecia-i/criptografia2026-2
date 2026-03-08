@@ -18,9 +18,15 @@ Para la autentificación de metadatos se almacena junto al texto cifrado un head
 ## Decisiones de seguridad
 
 - ¿Por que utilizar AEAD en lugar de un esquema de cifrado + hash?
+El uso de un sistema de cifrado autentificado con datos asociados (AEAD) proporciona un mecanismo de confidencialidad e integridad dentro dle mismo proceso de cifrado, el algoritmo, en este caso AES-GCM, simultáneamente hace el cifrado del texto plano y genera una etiqueta de autentificación que se concatena al texto cifrado, el uso de esta etiqueta de autentificación permite garantizar la integridad del texto cifrado y de los metadatos asociados detectando cualquier modificación durante el proceso de descifrado.
+
+Resulta mas conveniente este sistema ya que a diferencia de un sistema de cifrado + hash simple es mucho menos susceptible a errores causados por una mala implementación ademas de reducir los problemas causados por metadatos faltantes mientras simultáneamente garantiza la integridad de estos metadatos. En general podemos decir que el uso de AEAD presenta una solución mas robusta y estandarizada para el proceso de  autentificación y verificación de integridad de los datos.
 
 - ¿Qué sucede si se repite un nonce?
+Esto representa un fallo critico para la seguridad del algoritmo AES-GCM, si se repite un nonce junto con una llave privada el flujo de bits generados por el algoritmo se repetirá, de esta manera un atacante podría aplicar una operación XOR a ambos textos cifrados para obtener una parte del texto original.
+
+Ademas de esto la reutilización de un nonce y una llave privada permite a un atacante recuperar la llave de autentificación, comprometiendo la autentificación de toda la información cifrada con esa llave, de esta manera un atacante podría acceder a la información confidencial ademas de alterarla sin ser detectado.
 
 - ¿Contra qué tipo de atacante está protegiendo este esquema?
-
-Esta implementación busca proteger al sistema de un atacante que no posee la llave, pero que intenta manipular los datos o leerlos, como cambiar el texto cifrado, los metadatos, el nonce, o introducir datos maliciosos.
+El sistema está diseñado para proteger contra un atacante que puede acceder a y manipular los archivos cifrados almacenados en la boveda, se considera que un atacante podria intentar leer y alterar el texto cifrado, alterar los metadatos o reemplazar partes del contenedor para burlar los mecanismos de autentificación, confidencialidad e integridad.
+Esta implementación asume que el atacante tiene acceso a los archivos de documentos cifrados pero no conoce la contraseña del usuario o la llave derivada de esta.
