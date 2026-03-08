@@ -9,3 +9,16 @@ Contribuyentes:
 - Meneses Calderas Grecia Irais, 
 - Pérez Osorio Luis Eduardo, 
 - Rivas Gil María Lucía.
+
+## Cifrado simetrico
+El modulo de cifrado simétrico implementa un esquema AEAD (Authenticated Encryption with Associated Data) por medio de AES-GCM para cifrar archivos en un contenedor seguro ```\src\vault_container\```.
+
+El sistema permite al usuario cifrar o descifrar un archivo por medio de la linea de comandos, su uso es el siguiente
+
+```python main.py encrypt <archivo fuente>```
+
+```python main.py decrypt <contenedor> <archivo destino>```
+
+El reporte de este modulo está disponible en:
+
+[SecureSymEncryptionModule](documentation/D2-SecureSymEncryptionModule/FileEncryptionModule.md)
