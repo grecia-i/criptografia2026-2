@@ -48,5 +48,23 @@ Si no cifras la clave por destinatario, se pueden presentar los siguiente proble
 - Y permite identificar con precisión qué clave corresponde a qué usuario. Esto es importante no solo para funcionamiento, sino para seguridad. Si cada destinatario tiene su propia entrada en el contenedor, con su identificador y su clave cifrada, se evita confusión, intercambio de identidades o errores al descifrar. La gestión de acceso debe garantizar que solo usuarios autenticados y autorizados puedan usar las claves para cifrar y descifrar datos.
 
 ## Decisiones de seguridad
+### ¿Cómo identifican los destinatarios su llave?
+Cada usuario tiene un par de llaves asimétricas (puna ública y una privada) estas son generadas al momento de crear su cuenta (uso de la funcion create_user() ). La llave pública se almacena en users/{username}/public.pem y la privada en users/{username}/private.pem, protegida con su contraseña.
 
+Al cifrar un archivo, el sistema recorre la lista de destinatarios (args.to), carga la llave pública de cada uno y calcula su key_id con (uso de la funcion get_key_id(pub) ). Este identificador se almacena junto con la llave de archivo cifrada dentro del contenedor, asociando cada copia de la llave al destinatario correspondiente.
 
+Al momento de descifrar, el sistema carga la llave pública del usuario que intenta acceder, calcula su key_id  (uso de la funcion get_key_id(public_key) ) y lo usa para buscar dentro del contenedor la copia de la llave de archivo que fue cifrada para ese usuario. Si encuentra una coincidencia, usa su llave privada para descifrarla y acceder al contenido, en caso de que no hay coincidencia, el sistema rechaza el acceso con el mensaje #" ERROR: You are not an authorized recipient."
+
+### ¿Qué pasa si un atacante modifica la lista de destinatarios?
+AES-256-GCM proporciona autenticación integrada mediante un tag de 16 bytes que verifica tanto la integridad como la autenticidad del contenido cifrado. Si se llega a realizar cualquier modificación al ciphertext o a los datos autenticados adicionales (AAD) se invalida este tag y hace que el descifrado falle con InvalidTag.
+
+Sin embargo, si la lista de destinatarios o el mapeo de key_id a llave cifrada no está incluido como parte de los datos autenticados (AAD) en el esquema de cifrado, un atacante podría modificar esa estructura sin que la autenticación lo detecte, por consecuente el atacante podria eliminar destinatarios o agregar entradas falsas.
+
+### ¿Qué pasa si la llave pública es incorrecta?
+Si se usa una llave pública incorrecta al cifrar, se producen varios problamas; en primer lugar, la llave de archivo se cifrará con una llave pública que no corresponde a ningún usuario legítimo del sistema, esto significa que ningún usuario podrá descifrarla con su llave privada, ya que no habria coincidencias entre las llaves.
+
+En segundo lugar, el key_id calculado a partir de la llave pública incorrecta no coincidirá con el key_id de ningún usuario registrado, por lo tanto, al intentar descifrar, el sistema no encontrará una entrada válida para el usuario y rechazará el acceso.
+
+En tercer lugar, aunque el usuario verdadero intente descifrar con su llave privada correcta, la operación fallará criptográficamente porque la llave de archivo fue cifrada con una llave pública diferente, esto generará un error de autenticación como "ERROR: Incorrect password, could not decrypt key".
+
+El resultado final es que el archivo cifrado queda inaccesible para todos, incluyendo el usuario que lo cifró originalmente, ya que no existe ninguna llave privada que corresponda a la llave pública incorrecta usada.
