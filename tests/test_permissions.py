@@ -15,10 +15,9 @@ def mock_env(tmp_path):
     vault_path = tmp_path / "vault"
     vault_path.mkdir()
     
-    with patch("main.USERS_PATH", str(users_path)), \
-         patch("main.VAULT_PATH", str(vault_path)):
+    with patch("src.main.USERS_PATH", str(users_path)), \
+         patch("src.main.VAULT_PATH", str(vault_path)):
         yield tmp_path, users_path, vault_path
-             
 
 def test_sharing_and_unauthorized_access(mock_env):
     tmp_path, users_path, vault_path = mock_env
@@ -38,7 +37,7 @@ def test_sharing_and_unauthorized_access(mock_env):
         to=["Alice", "Bob"]
     )
     
-    with patch("build_parser") as mock_parser:
+    with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_sim
         main()
 
@@ -54,7 +53,7 @@ def test_sharing_and_unauthorized_access(mock_env):
             output_file=str(output_alice),
             user="Alice"
         )
-        with patch("build_parser") as mock_p:
+        with patch("src.main.build_parser") as mock_p:
             mock_p.return_value.parse_args.return_value = decrypt_alice
             main()
     
@@ -69,7 +68,7 @@ def test_sharing_and_unauthorized_access(mock_env):
             output_file=str(output_bob),
             user="Bob"
         )
-        with patch("build_parser") as mock_p:
+        with patch("src.main.build_parser") as mock_p:
             mock_p.return_value.parse_args.return_value = decrypt_bob
             main()
 
@@ -84,12 +83,13 @@ def test_sharing_and_unauthorized_access(mock_env):
             output_file=str(output_eve),
             user="Eve"
         )
-        with patch("build_parser") as mock_p:
+        with patch("src.main.build_parser") as mock_p:
             mock_p.return_value.parse_args.return_value = decrypt_args
-            with pytest.raises(Exception):
-                main()
+            main()
 
+    assert not output_eve.exists(), "Eve no debe poder descifrar el archivo"
 
+# Wrong private key then fails
 def test_wrong_password_cannot_decrypt(mock_env):
     tmp_path, users_path, vault_path = mock_env
 
@@ -106,7 +106,7 @@ def test_wrong_password_cannot_decrypt(mock_env):
         to=["Alice"]
     )
     with patch("getpass.getpass", return_value="correctpassword"), \
-         patch("build_parser") as mock_parser:
+         patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_args
         main()
 
@@ -121,9 +121,8 @@ def test_wrong_password_cannot_decrypt(mock_env):
         user="Alice"
     )
     with patch("getpass.getpass", return_value="wrongpassword"), \
-         patch("build_parser") as mock_p:
+         patch("src.main.build_parser") as mock_p:
         mock_p.return_value.parse_args.return_value = decrypt_args
-        with pytest.raises(Exception):
-            main()
+        main()
 
     assert not output_file.exists(), "El archivo resultante no se genera cuando el descifrado falla"
