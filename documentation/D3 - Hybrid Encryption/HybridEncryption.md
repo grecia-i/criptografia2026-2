@@ -1,12 +1,44 @@
 # Hybrid Encryption
 
 Contribuyentes:
-Castillo Soto Jacqueline,
-Meneses Calderas Grecia Irais,
-Pérez Osorio Luis Eduardo,
-Rivas Gil María Lucía.
 
-##Explicación del diseño híbrido
-###¿Por qué se utiliza el cifrado híbrido?
+- Castillo Soto Jacqueline,
+- Meneses Calderas Grecia Irais,
+- Pérez Osorio Luis Eduardo,
+- Rivas Gil María Lucía.
+
+## Explicación del diseño híbrido
+### ¿Por qué se utiliza el cifrado híbrido?
+El cifrado híbrido se utiliza porque combina la eficiencia del cifrado simétrico con la seguridad y flexibilidad del cifrado asimétrico.
+El cifrado simétrico es el más adecuado para proteger archivos, ya que trabaja de forma rápida incluso con grandes volúmenes de datos. En cambio, el cifrado asimétrico no se usa para cifrar el archivo completo, sino únicamente una clave simétrica pequeña.
+El sistema híbrido existe porque el cifrado simétrico y el asimétrico tienen cada una sus ventajas. El cifrado simétrico, como AES-GCM, es muy rápido y está pensado para proteger grandes volúmenes de datos; además, GCM es un modo AEAD, es decir, no solo cifra, también protege la integridad de los datos y de los metadatos asociados. En cambio, el cifrado asimétrico, no se usa para cifrar archivos enteros, sino para proteger mensajes pequeños.
+
+El proceso funciona así:
+
+- Se genera una clave simétrica nueva y aleatoria.
+- Esa clave se usa para cifrar el archivo o mensaje.
+- Luego, la clave simétrica se cifra con la clave pública del destinatario.
+- El destinatario usa su clave privada para recuperar la clave simétrica.
+- Finalmente, usa esa clave simétrica para descifrar el contenido original.
+
+El resultado es que el archivo solo se cifra una vez, pero la clave que lo abre puede distribuirse de forma segura a varias personas. Si usaramos solo cifrado asimétrico, el sistema sería mucho más lento e ineficiente para archivos grandes. Si usaramos solo cifrado simétrico, se presentaría el problema de cómo compartir esa clave secreta con seguridad entre varios usuarios. El cifrado híbrido resuelve ambos problemas: usa la rapidez del cifrado simétrico para los datos y la facilidad del cifrado asimétrico para el intercambio de claves.
+
+Ventajas: 
+
+1. Eficiencia. El cifrado simétrico es mucho más rápido para procesar archivos completos. Por eso se usa para el contenido real. 
+
+2. Intercambio seguro de claves. La criptografía asimétrica permite proteger la clave simétrica sin necesidad de que ya exista un canal secreto previo. 
+
+3. Control de acceso. Solo quien posea la clave privada correcta puede recuperar la clave simétrica y, por tanto, abrir el archivo. 
+
+
+
+
+### ¿Por qué sigue siendo necesario el cifrado simétrico?
+
+
+### ¿Por qué es necesario el cifrado de claves por destinatario?
+
+## Decisiones de seguridad
 
 
