@@ -41,7 +41,10 @@ jobs:
 
       - name: Run pip-audit
         run: pip install pip-audit && pip-audit
-        
+
+      - name: Secrets Scanning with Gitleaks
+        uses: zricethezav/gitleaks-action@v2
+      
       - name: Install Snyk
         run: npm install -g snyk
 
@@ -51,6 +54,3 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --file=requirements.txt
-
-      - name: Secrets Scanning with Gitleaks
-        uses: zricethezav/gitleaks-action@v2
