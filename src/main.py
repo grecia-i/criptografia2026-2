@@ -1,9 +1,9 @@
 import os
 import getpass
 import secrets
-from encryption.encrypt import encrypt_file
-from encryption.decrypt import decrypt_container
-from encryption.keys import (
+from src.encryption.encrypt import encrypt_file
+from src.encryption.decrypt import decrypt_container
+from src.encryption.keys import (
     generate_key_pair,
     store_private_key,
     store_public_key,
@@ -11,7 +11,7 @@ from encryption.keys import (
     load_public_key,
     get_key_id
 )
-from parser.parser import build_parser
+from src.parser.parser import build_parser
 #from derivation.pw_derivation import derive_key, write_salt, read_salt
 
 from warnings import deprecated
@@ -174,18 +174,23 @@ def main():
 
     except FileNotFoundError as e:
         print(f"ERROR: {e}")
+        raise e
 
     except PermissionError as e:
         print(f"ERROR: Permission denied - {e}")
+        raise e
 
     except ValueError as e:
         print(f"ERROR: {e}")
+        raise e
 
     except Exception as e:
         print(f"ERROR: Unexpected failure - {e}")
+        raise e
     
     except FileExistsError as e:
         print(f"ERROR: {e}")
+        raise e
 
 if __name__ == "__main__":
     main()
