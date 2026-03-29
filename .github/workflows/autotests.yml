@@ -20,7 +20,7 @@ jobs:
       - name: Python Set Up 
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install dependencies
@@ -30,7 +30,9 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/
+          pytest tests/ --import-mode=importlib
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
       # bandit analysis of static code
       - name: Static Code Analysis with Bandit
@@ -44,30 +46,11 @@ jobs:
         run: npm install -g snyk
 
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/python-3.10@master
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --file=requirements.txt
 
-      # Secrets Scanning with Gitleaks
       - name: Secrets Scanning with Gitleaks
         uses: zricethezav/gitleaks-action@v2
-        with:
-          args: --no-git --path=.
-
-      # Publish ZAP Report to GitHub Pages
-      - name: Publish ZAP Report to GitHub Pages
-        run: |
-          REPORT_NAME="zap_report_$(date +'%Y%m%d%H%M%S').html"
-          mv report_html.html $REPORT_NAME
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          
-          git fetch origin
-          git checkout gh-pages
-          git rebase origin/gh-pages
-          
-          echo "Push new report to gh-pages branch..."
-          cp $REPORT_NAME index.html
-          git add index.html
-          git commit -m "Publish ZAP report: $REPORT_NAME (Run ID: $GITHUB_RUN_ID)"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
