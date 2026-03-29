@@ -30,7 +30,9 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/
+          pytest tests/ --import-mode=importlib
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
       # bandit analysis of static code
       - name: Static Code Analysis with Bandit
