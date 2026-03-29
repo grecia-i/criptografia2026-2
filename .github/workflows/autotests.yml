@@ -20,7 +20,7 @@ jobs:
       - name: Python Set Up 
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.12'
           cache: 'pip'
 
       - name: Install dependencies
@@ -30,9 +30,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/ --import-mode=importlib
-        env:
-          PYTHONPATH: ${{ github.workspace }}
+          pytest tests/
 
       # bandit analysis of static code
       - name: Static Code Analysis with Bandit
@@ -46,9 +44,7 @@ jobs:
         run: npm install -g snyk
 
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/python@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        uses: snyk/actions/python-3.10@master
         with:
           args: --file=requirements.txt
 
