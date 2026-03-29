@@ -39,7 +39,19 @@ El cifrado simétrico usa una misma clave para cifrar y descifrar, y justamente 
 Otro punto importante es que el cifrado simétrico no solo sigue vigente por rapidez, sino también por seguridad práctica. El sistema no solo cifra, sino que también protege la integridad del contenido mediante una etiqueta de autenticación, lo que lo vuelve todavía más útil en sistemas reales. Por lo tando en el sistema híbrido combinan la seguridad del asimétrico con la velocidad del simétrico.
 
 ### ¿Por qué es necesario el cifrado de claves por destinatario?
+Es necesario porque el archivo puede estar dirigido a varias personas autorizadas, pero no todas comparten la misma clave privada. En criptografía asimétrica, cada usuario tiene su propio par de claves: una pública y una privada. La clave pública puede compartirse, pero la privada solo la posee su dueño. Por eso, si varias personas puedan abrir el mismo archivo de forma segura, debes proteger la clave del archivo por separado para cada una, usando su clave pública correspondiente. 
 
+Por lo que, en la cuestión de una clave simétrica el archivo se cifra y esa clave simétrica debe llegar de forma segura a cada usuario autorizado. Y como cada usuario tiene una clave pública distinta, la forma correcta de hacerlo es crear una copia cifrada de la clave de archivo para cada destinatario. Las claves pueden ser simétricas o asimétricas, y que proteger las claves es fundamental porque si alguien obtiene la clave correcta, obtiene también acceso a los datos.
+
+Si no cifras la clave por destinatario, se pueden presentar los siguiente problemas:
+
+- No sería posible controlar con precisión quién puede acceder al archivo, ya que si todos los usuarios dependieran de una única copia de la clave o de un mismo mecanismo de protección, se perdería la asociación directa entre cada usuario y su clave protegida. En cambio, al cifrar la clave del archivo de manera individual para cada destinatario, se establece un vínculo específico entre el usuario y su correspondiente acceso, garantizando que únicamente los usuarios autorizados puedan recuperar la clave y, por lo tanto, descifrar el archivo.
+
+- Evita compartir secretos entre destinatarios. En cifrado simétrico, usar una sola clave compartida entre varios usuarios puede ser problemático porque esa clave tendría que distribuirse por adelantado y, si se filtra, todos los datos protegidos con ella quedan comprometidos. 
+
+- En el cifrado simétrico se presenta problemas de escalabilidad cuando muchos usuarios necesitan claves compartidas, porque la administración de claves crece y se vuelve compleja. El cifrado híbrido resuelve esto: el archivo se cifra una sola vez con AES, y luego la clave de archivo se cifra una vez por cada destinatario con su clave pública. Así no hay que volver a cifrar todo el archivo para cada persona.
+
+- Y permite identificar con precisión qué clave corresponde a qué usuario. Esto es importante no solo para funcionamiento, sino para seguridad. Si cada destinatario tiene su propia entrada en el contenedor, con su identificador y su clave cifrada, se evita confusión, intercambio de identidades o errores al descifrar. La gestión de acceso debe garantizar que solo usuarios autenticados y autorizados puedan usar las claves para cifrar y descifrar datos.
 
 ## Decisiones de seguridad
 
