@@ -31,13 +31,15 @@ Ventajas:
 
 3. Control de acceso. Solo quien posea la clave privada correcta puede recuperar la clave simétrica y, por tanto, abrir el archivo. 
 
-
-
-
 ### ¿Por qué sigue siendo necesario el cifrado simétrico?
+Sigue siendo necesario porque es el mecanismo que realmente permite proteger los datos de forma rápida, eficiente y escalable. Aunque existen sistemas híbridos que combinan cifrado simétrico y asimétrico, el componente simétrico no desaparece, porque es el que hace el trabajo pesado de cifrar el contenido real del archivo o de la comunicación.
 
+El cifrado simétrico usa una misma clave para cifrar y descifrar, y justamente por eso su funcionamiento es mucho más simple y veloz que el del cifrado asimétrico. Además es especialmente adecuada para grandes volúmenes de datos, porque permite cifrar y descifrar rápidamente sin exigir tanta carga computacional. Y su velocidad y eficiencia hacen que siga siendo ampliamente usado en comunicaciones seguras, bases de datos, almacenamiento de archivos y protocolos de red.
+
+Otro punto importante es que el cifrado simétrico no solo sigue vigente por rapidez, sino también por seguridad práctica. El sistema no solo cifra, sino que también protege la integridad del contenido mediante una etiqueta de autenticación, lo que lo vuelve todavía más útil en sistemas reales. Por lo tando en el sistema híbrido combinan la seguridad del asimétrico con la velocidad del simétrico.
 
 ### ¿Por qué es necesario el cifrado de claves por destinatario?
+
 
 ## Decisiones de seguridad
 
