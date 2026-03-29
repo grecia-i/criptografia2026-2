@@ -42,7 +42,7 @@ def test_sharing_and_unauthorized_access(mock_env):
         main()
 
     vault_file = vault_path / "test.txt"
-    assert vault_file.exists()
+    assert vault_file.exists() # nosec
 
     # Alice can decrypt ? same who shared
     output_alice = tmp_path / "output_alice.txt"
@@ -57,7 +57,7 @@ def test_sharing_and_unauthorized_access(mock_env):
             mock_p.return_value.parse_args.return_value = decrypt_alice
             main()
     
-    assert output_alice.read_text() == content
+    assert output_alice.read_text() == content # nosec
 
     # Bob can decrypt ? the one it was shared to
     output_bob = tmp_path / "output_bob.txt"
@@ -72,7 +72,7 @@ def test_sharing_and_unauthorized_access(mock_env):
             mock_p.return_value.parse_args.return_value = decrypt_bob
             main()
 
-    assert output_bob.read_text() == content
+    assert output_bob.read_text() == content # nosec
 
     # Eve shouldn't decrypt
     output_eve = tmp_path / "output_eve.txt"
@@ -110,7 +110,7 @@ def test_wrong_password_cannot_decrypt(mock_env):
         main()
 
     vault_file = vault_path / "secret.txt"
-    assert vault_file.exists()
+    assert vault_file.exists() # nosec
 
     output_file = tmp_path / "output_alice.txt"
     decrypt_args = MagicMock(
@@ -125,4 +125,4 @@ def test_wrong_password_cannot_decrypt(mock_env):
         with pytest.raises(Exception):
             main()
 
-    assert not output_file.exists(), "El archivo resultante no se genera cuando el descifrado falla"
+    assert not output_file.exists(), "El archivo resultante no se genera cuando el descifrado falla" # nosec
