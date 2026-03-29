@@ -96,3 +96,45 @@ def test_sharing_and_unauthorized_access(mock_env):
         
             with pytest.raises(Exception):
                 main()
+def test_wrong_password_cannot_decrypt(mock_env):
+    tmp_path, users_path, vault_path = mock_env
+
+    # Crea el usuario con la contrasena correcta
+    with patch("getpass.getpass", return_value="correctpassword"):
+        create_user("Alice")
+
+    # Crea el archivo temporar para cifrar
+    content = "sensitive data 123"
+    test_file = tmp_path / "secret.txt"
+    test_file.write_text(content)
+
+    # Cifra con la contrasena correcta
+    encrypt_args = MagicMock(
+        command="encrypt",
+        input_file=str(test_file),
+        to=["Alice"]
+    )
+    with patch("getpass.getpass", return_value="correctpassword"), \
+         patch("build_parser") as mock_parser:
+        mock_parser.return_value.parse_args.return_value = encrypt_args
+        main()
+
+    vault_file = vault_path / "secret.txt"
+    assert vault_file.exists()
+
+    # INtenta hacer el cifrado con la contrasena incorrecta
+    output_file = tmp_path / "output_alice.txt"
+    decrypt_args = MagicMock(
+        command="decrypt",
+        container_dir=str(vault_file),
+        output_file=str(output_file),
+        user="Alice"
+    )
+    with patch("getpass.getpass", return_value="wrongpassword"), \
+         patch("build_parser") as mock_p:
+        mock_p.return_value.parse_args.return_value = decrypt_args
+
+        with pytest.raises(Exception):
+            main()
+
+    assert not output_file.exists(), "El archivo resultante no se genera cuando el descifrado falla"
