@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.main import main, create_user, get_master_key, build_parser
+from src.main import main, create_user, build_parser
 
 '''
 File shared with 2 users then both can decrypt.
