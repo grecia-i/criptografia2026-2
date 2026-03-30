@@ -17,7 +17,6 @@ TIMEZONE = tzlocal.get_localzone()
 
 #Asymetric encryption
 
-
 def encrypt_file_key_with_pubkey(file_key, public_key):
     return public_key.encrypt(
         file_key,
@@ -35,14 +34,6 @@ def encrypt_file_key_with_pubkey(file_key, public_key):
 def generate_key():
     return AESGCM.generate_key(KEY_SIZE)
 
-@deprecated("use store_public_key() or store_private_key()")
-def write_key(vault_path,key):
-    key_path = os.path.join(vault_path,"file.key")
-    os.makedirs(vault_path,exist_ok=True)
-    with open(key_path,"wb") as key_file:
-        key_file.write(key)
-
-
 #recipient key is 
 #   recipient_public_keys = [
 #     {"user": alice, "id": "alice_fingerprint", "key": alice_pubkey},
@@ -53,17 +44,12 @@ def encrypt_file(input_file, vault_dir, recipient_public_keys):
     key = generate_key()
 
     os.makedirs(vault_dir, exist_ok=True)
-    #write_key(vault_dir,key)
 
     with open(input_file, "rb") as f:
         plaintext = f.read()
 
     nonce = secrets.token_bytes(NONCE_SIZE)
 
-    
-
-    # encrypted_key = encrypt_key(key,derived_key,header_bytes,vault_dir)
-    # write_key(vault_dir,encrypted_key)
     recipients = []
     for r in recipient_public_keys:
         enc_key = encrypt_file_key_with_pubkey(key, r["key"])
@@ -83,9 +69,6 @@ def encrypt_file(input_file, vault_dir, recipient_public_keys):
         "file_size": os.path.getsize(input_file),
         "key_length": KEY_SIZE,
         "time_creation": datetime.now(TIMEZONE).isoformat()
-        # the owner id NEEDS TO BE CHANGED to be generated while creating an user -> storaged
-        # "owner_id": str(uuid.uuid4), # random UUID in a cryptographically-secure method according to RFC 9562, §5.4.
-        # "file_id": str(uuid.uuid4)
     }
 
     header_bytes = json.dumps(header, sort_keys=True).encode()
@@ -105,18 +88,3 @@ def encrypt_file(input_file, vault_dir, recipient_public_keys):
 
     with open(os.path.join(vault_dir, "authentication_tag"), "wb") as f:
         f.write(tag)
-
-
-@deprecated(" ")
-def encrypt_key(plaintext_key,derived_key,header_bytes,vault_dir):
-    key_nonce = secrets.token_bytes(NONCE_SIZE)
-    aesgcm = AESGCM(derived_key)
-
-    encrypted_key = aesgcm.encrypt(key_nonce,plaintext_key,header_bytes)
-
-    with open(os.path.join(vault_dir, "key_nonce"), "wb") as f:
-        f.write(key_nonce)
-
-    return encrypted_key
-
-#test code

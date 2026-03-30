@@ -14,44 +14,8 @@ from src.encryption.keys import (
 from src.parser.parser import build_parser
 #from derivation.pw_derivation import derive_key, write_salt, read_salt
 
-from warnings import deprecated
 VAULT_PATH = "vault_container"
 USERS_PATH = "users"
-SALT_PATH = os.path.join(VAULT_PATH,"salt.bin")
-
-@deprecated("Key derivation is handled internally by the serialization module")
-def get_master_key():
-    if not os.path.isfile(SALT_PATH):
-        print("Password has not been set, please create a password")
-        print("NOTE: losing the password means losing access to ALL encrypted files")
-        print()
-
-        while True:
-            password = getpass.getpass(prompt='Enter your password: ')
-            password_confirm = getpass.getpass(prompt='Confirm your password: ')
-
-            if not password:
-                print("Password cannot be empty")
-                continue
-
-            if password == password_confirm:
-                salt = secrets.token_bytes(16)
-                os.makedirs(VAULT_PATH, exist_ok=True)
-                write_salt(salt, SALT_PATH)
-                break
-
-            print("Passwords do not match")
-    else:
-        password = getpass.getpass(prompt='Enter your password: ')
-        if not password:
-            raise ValueError("Password cannot be empty")
-        
-        salt = read_salt(SALT_PATH)
-        
-
-    master_key = derive_key(password, salt)
-    return master_key
-
 
 def create_user(username):
     user_dir = os.path.join(USERS_PATH, username)
@@ -80,13 +44,6 @@ def validate_container(container_dir):
     if not os.path.isdir(container_dir):
         raise FileNotFoundError(f"Container does not exist: {container_dir}")
 
-    # required_files = [
-    #     "header.json",
-    #     "nonce",
-    #     "ciphertext",
-    #     "file.key",
-    #     "key_nonce"
-    # ]
     required_files = [
         "header.json",
         "nonce",
@@ -126,10 +83,8 @@ def main():
             
             vault_container = os.path.join(VAULT_PATH, os.path.basename(file_name))
             validate_encrypt_output(vault_container)
-            print("Vault container = ", vault_container) #debug
+            #print("Vault container = ", vault_container) #debug
 
-            # master_key = get_master_key()
-            # encrypt_file(file_name, vault_container,master_key)
             recipient_public_keys = []
             for username in args.to:
                 pub_path = os.path.join(USERS_PATH, username, "public.pem")
@@ -153,9 +108,7 @@ def main():
             vault_container = args.container_dir
             validate_container(vault_container)
 
-            #master_key = get_master_key()
             validate_decrypt_output(args.output_file)
-            #decrypt_container(vault_container, args.output_file, master_key)
             user_dir = os.path.join(USERS_PATH, args.user)
             if not os.path.isdir(user_dir):
                 raise FileNotFoundError("User does not exist")

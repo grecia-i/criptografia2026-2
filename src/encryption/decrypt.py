@@ -2,7 +2,6 @@ import os
 import json
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
-from warnings import deprecated
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 
@@ -20,13 +19,6 @@ def decrypt_file_key_with_privkey(encrypted_key, private_key):
             label=None
         )
     )
-
-@deprecated("")
-def read_key(path):
-    with open(path, "rb") as key_file:
-        key = key_file.read()
-    return key
-
 
 #def decrypt_container(container_dir, output_file, derived_key):
 def decrypt_container(container_dir, output_file, private_key, my_id):
@@ -67,22 +59,3 @@ def decrypt_container(container_dir, output_file, private_key, my_id):
 
     with open(output_file, "wb") as f:
         f.write(plaintext)
-
-@deprecated("")
-def decrypt_key(header_bytes, container_dir, derived_key):
-    key_path = os.path.join(container_dir, "file.key")
-    encrypted_key = read_key(key_path)
-
-    with open(os.path.join(container_dir, "key_nonce"), "rb") as f:
-        nonce = f.read()
-
-    aesgcm = AESGCM(derived_key)
-
-    try:
-        decrypted_key = aesgcm.decrypt(nonce, encrypted_key, header_bytes)
-    except InvalidTag:
-        raise ValueError(
-            "Authentication failed: password may be incorrect or the encrypted files may have been tampered with"
-        )
-
-    return decrypted_key
