@@ -76,3 +76,12 @@ En segundo lugar, el key_id calculado a partir de la llave pública incorrecta n
 En tercer lugar, aunque el usuario verdadero intente descifrar con su llave privada correcta, la operación fallará criptográficamente porque la llave de archivo fue cifrada con una llave pública diferente, esto generará un error de autenticación como "ERROR: Incorrect password, could not decrypt key".
 
 El resultado final es que el archivo cifrado queda inaccesible para todos, incluyendo el usuario que lo cifró originalmente, ya que no existe ninguna llave privada que corresponda a la llave pública incorrecta usada.
+
+
+##Referencias
+Chandan, S. (2025, 5 septiembre). ¿Qué es el cifrado simétrico? | Consultoría de cifrado. Encryption Consulting. https://www.encryptionconsulting.com/es/education-center/what-is-symmetric-encryption/
+Amazon Web Services. (s. f.). ¿Qué es la criptografía? Amazon Web Services, Inc. https://aws.amazon.com/es/what-is/cryptography/ 
+¿Qué es la encriptación híbrida? - Términos y definiciones de ciberseguridad. (s. f.). https://www.vpnunlimited.com/es/help/cybersecurity/hybrid-encryption?srsltid=AfmBOopCqt3fDttV13cSlURL-q0UdRuSkgyejIjlTcuPV6ptgruGqOyo
+Dworkin, M. J. (2007). Recommendation for block cipher modes of operation : https://doi.org/10.6028/nist.sp.800-38d 
+Encriptación híbrida. (s. f.). Google For Developers. https://developers.google.com/tink/hybrid?hl=es-419
+Bengtsson, J. (2024, 7 noviembre). What is Symmetric Encryption? Nexus IN Groupe. https://nexus.ingroupe.com/what-is-symmetric-encryption/
