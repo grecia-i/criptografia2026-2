@@ -79,6 +79,7 @@ El resultado final es que el archivo cifrado queda inaccesible para todos, inclu
 
 
 ##Referencias
+
 Chandan, S. (2025, 5 septiembre). ¿Qué es el cifrado simétrico? | Consultoría de cifrado. Encryption Consulting. https://www.encryptionconsulting.com/es/education-center/what-is-symmetric-encryption/
 Amazon Web Services. (s. f.). ¿Qué es la criptografía? Amazon Web Services, Inc. https://aws.amazon.com/es/what-is/cryptography/ 
 ¿Qué es la encriptación híbrida? - Términos y definiciones de ciberseguridad. (s. f.). https://www.vpnunlimited.com/es/help/cybersecurity/hybrid-encryption?srsltid=AfmBOopCqt3fDttV13cSlURL-q0UdRuSkgyejIjlTcuPV6ptgruGqOyo
