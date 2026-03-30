@@ -77,12 +77,12 @@ En tercer lugar, aunque el usuario verdadero intente descifrar con su llave priv
 
 El resultado final es que el archivo cifrado queda inaccesible para todos, incluyendo el usuario que lo cifró originalmente, ya que no existe ninguna llave privada que corresponda a la llave pública incorrecta usada.
 
-##Ejecución de pruebas
+## Ejecución de pruebas
 <img width="1242" height="337" alt="image" src="https://github.com/user-attachments/assets/5bc63133-5378-4c13-861b-ee4b3a33d6a1" />
 
 
 
-##Referencias
+## Referencias
 
 Chandan, S. (2025, 5 septiembre). ¿Qué es el cifrado simétrico? | Consultoría de cifrado. Encryption Consulting. https://www.encryptionconsulting.com/es/education-center/what-is-symmetric-encryption/
 Amazon Web Services. (s. f.). ¿Qué es la criptografía? Amazon Web Services, Inc. https://aws.amazon.com/es/what-is/cryptography/ 
