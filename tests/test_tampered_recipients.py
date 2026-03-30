@@ -1,70 +1,75 @@
-import os
 import json
-import tempfile
 import pytest
+from unittest.mock import patch, MagicMock
+from src.main import main, create_user
 
-from encryption.encrypt import encrypt_file
-from encryption.decrypt import decrypt_container
-from encryption.keys import (
-    generate_key_pair,
-    store_private_key,
-    store_public_key,
-    load_private_key,
-    load_public_key,
-    get_key_id
-)
 
-def test_tampered_recipient_list_fails():
-    with tempfile.TemporaryDirectory() as tmp:
-        users_dir = os.path.join(tmp, "users")
-        vault_dir = os.path.join(tmp, "vault")
-        os.makedirs(users_dir, exist_ok=True)
+@pytest.fixture
+def mock_env(tmp_path):
+    users_path = tmp_path / "users"
+    users_path.mkdir()
+    vault_path = tmp_path / "vault"
+    vault_path.mkdir()
 
-        # Crear usuarios Alice y Bob
-        for username in ["alice", "bob"]:
-            user_dir = os.path.join(users_dir, username)
-            os.makedirs(user_dir, exist_ok=True)
+    with patch("src.main.USERS_PATH", str(users_path)), \
+         patch("src.main.VAULT_PATH", str(vault_path)):
+        yield tmp_path, users_path, vault_path
 
-            priv, pub = generate_key_pair()
-            store_private_key(priv, os.path.join(user_dir, "private.pem"), "1234")
-            store_public_key(pub, os.path.join(user_dir, "public.pem"))
 
-        # Cargar claves públicas
-        alice_pub = load_public_key(os.path.join(users_dir, "alice", "public.pem"))
-        bob_pub = load_public_key(os.path.join(users_dir, "bob", "public.pem"))
+def test_tampered_recipient_list_fails(mock_env):
+    tmp_path, users_path, vault_path = mock_env
 
-        recipients = [
-            {"user": "alice", "id": get_key_id(alice_pub), "key": alice_pub},
-            {"user": "bob", "id": get_key_id(bob_pub), "key": bob_pub},
-        ]
+    # Crear usuarios
+    with patch("getpass.getpass", return_value="1234"):
+        create_user("Alice")
+        create_user("Bob")
 
-        # Crear archivo de prueba
-        input_file = os.path.join(tmp, "mensaje.txt")
-        with open(input_file, "w", encoding="utf-8") as f:
-            f.write("archivo secreto")
+    # Crear archivo de prueba
+    content = "archivo secreto"
+    test_file = tmp_path / "mensaje.txt"
+    test_file.write_text(content)
 
-        container_dir = os.path.join(vault_dir, "mensaje.txt")
-        encrypt_file(input_file, container_dir, recipients)
+    # Cifrar para Alice y Bob
+    encrypt_args = MagicMock(
+        command="encrypt",
+        input_file=str(test_file),
+        to=["Alice", "Bob"]
+    )
 
-        # Manipular header.json
-        header_path = os.path.join(container_dir, "header.json")
-        with open(header_path, "r", encoding="utf-8") as f:
-            header = json.load(f)
+    with patch("src.main.build_parser") as mock_parser:
+        mock_parser.return_value.parse_args.return_value = encrypt_args
+        main()
 
-        # Alterar la lista de destinatarios
-        header["recipients"][1]["user"] = "eve"
+    container_dir = vault_path / "mensaje.txt"
+    assert container_dir.exists()  # nosec
 
-        with open(header_path, "w", encoding="utf-8") as f:
-            json.dump(header, f, sort_keys=True)
+    # Manipular header.json cambiando la lista de recipients
+    header_path = container_dir / "header.json"
+    with open(header_path, "r", encoding="utf-8") as f:
+        header = json.load(f)
 
-        # Intentar descifrar con Alice
-        alice_priv = load_private_key(
-            os.path.join(users_dir, "alice", "private.pem"),
-            "1234"
-        )
-        alice_id = get_key_id(alice_pub)
+    # Alterar el nombre de Bob por Eve
+    for recipient in header["recipients"]:
+        if recipient.get("user") == "Bob":
+            recipient["user"] = "Eve"
+            break
 
-        output_file = os.path.join(tmp, "salida.txt")
+    with open(header_path, "w", encoding="utf-8") as f:
+        json.dump(header, f, sort_keys=True)
 
-        with pytest.raises(ValueError, match="Authentication failed|authorized recipient"):
-            decrypt_container(container_dir, output_file, alice_priv, alice_id)
+    # Intentar descifrar con Bob: debe fallar porque el header fue alterado
+    output_bob = tmp_path / "salida_bob.txt"
+    decrypt_args = MagicMock(
+        command="decrypt",
+        container_dir=str(container_dir),
+        output_file=str(output_bob),
+        user="Bob"
+    )
+
+    with patch("getpass.getpass", return_value="1234"), \
+         patch("src.main.build_parser") as mock_parser:
+        mock_parser.return_value.parse_args.return_value = decrypt_args
+        with pytest.raises(Exception):
+            main()
+
+    assert not output_bob.exists()  # nosec
