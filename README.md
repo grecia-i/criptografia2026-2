@@ -31,19 +31,19 @@ Uso del programa:
 
 ### Creación de usuarios
 
-``main.py create-user <usuario>``
+``python -m src.main create-user <usuario>``
 
 En este punto del desarrollo de se ha implementado un mecanismo para transmitir llaves, todos los usuarios deben ser creados localmente.
 
 ### Cifrado de archivos
 
-``main.py encrypt <ruta del archivo a cifrar> --to <Lista de usuarios>``
+``python -m src.main encrypt <ruta del archivo a cifrar> --to <Lista de usuarios>``
 
 La lista de usuarios es una serie de nombres de usuario separada por espacios.
 
 ### Descifrado de archivos
 
-``main.py decrypt --user <nombre> <ruta destino> <ruta objetivo>``
+``python -m src.main decrypt --user <nombre> <ruta destino> <ruta objetivo>``
 
 Ruta objetivo es el archivo a descifrar, ejemplo ``"\vault_container\test.txt"``
 
