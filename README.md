@@ -27,7 +27,9 @@ El reporte de este modulo está disponible en:
 
 [Hybrid Encryption](documentation/D3%20-%20Hybrid%20Encryption/HybridEncryption.md)
 
-Uso del programa:
+## Uso del programa
+
+Los comandos se ejecutan desde el directorio raíz del proyecto
 
 ### Creación de usuarios
 
