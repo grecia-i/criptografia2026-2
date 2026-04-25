@@ -88,7 +88,7 @@ def decrypt_container(container_dir:str, output_file:str, private_key:str, my_id
     # Localizar la llave pública del remitente para verificar la firma
     # Se busca en la carpeta de usuarios basándose en el sender_id del header
     sender_key = None
-    users_path = "users"
+    #users_path = "users"
     
     for username in os.listdir(users_path):
         pub_path = os.path.join(users_path, username, "public.pem")

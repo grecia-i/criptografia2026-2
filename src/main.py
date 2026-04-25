@@ -108,7 +108,7 @@ def main():
             public_key = load_public_key(os.path.join(user_dir, "public.pem"))
             my_id = get_key_id(public_key)
 
-            decrypt_container(args.container_dir, args.output_file, private_key, my_id)
+            decrypt_container(args.container_dir, args.output_file, private_key, my_id, USERS_PATH)
             print(f"Success: File verified and decrypted to {args.output_file}")
 
     except Exception as e:
