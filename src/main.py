@@ -11,7 +11,7 @@ from src.encryption.keys import (
     load_public_key,
     get_key_id
 )
-from parser.parser import build_parser
+from src.parser.parser import build_parser
 
 VAULT_PATH = "vault_container"
 USERS_PATH = "users"

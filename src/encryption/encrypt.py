@@ -5,7 +5,7 @@ from datetime import datetime # for the timestamp
 import zoneinfo
 import tzlocal # timestamp + timezone
 import uuid # rand id generation
-from encryption.keys import load_public_key, get_key_id
+from src.encryption.keys import load_public_key, get_key_id
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
