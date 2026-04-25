@@ -1,0 +1,5 @@
+ignore:
+  SNYK-PYTHON-PYGMENTS-15746419:
+    - '*':
+        reason: "No fix available, low risk in test dependency"
+        expires: 2026-12-31T00:00:00.000Z

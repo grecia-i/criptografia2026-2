@@ -2,16 +2,15 @@ import os
 import json
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
-from warnings import deprecated
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
-from encryption.keys import load_public_key, get_key_id
-
+from cryptography.exceptions import InvalidSignature
+from src.encryption.keys import load_public_key, get_key_id
 
 SUPPORTED_ALGORITHMS = "AES-256-GCM"
 
+#Signing
 def verify_signature(public_key, signature, data):
-    "Verificar la firma" 
     try:
         public_key.verify(
             signature,

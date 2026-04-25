@@ -1,6 +1,9 @@
 /src/vault_container/*
+vault_container/*
 /src/*txt
+*txt
 *__pycache__
 .venv/
 *.pyc
-*pem
+*.pem
+.vscode
