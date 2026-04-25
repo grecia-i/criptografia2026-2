@@ -1,9 +1,9 @@
 import os
 import getpass
 import secrets
-from encryption.encrypt import encrypt_file
-from encryption.decrypt import decrypt_container
-from encryption.keys import (
+from src.encryption.encrypt import encrypt_file
+from src.encryption.decrypt import decrypt_container
+from src.encryption.keys import (
     generate_key_pair,
     store_private_key,
     store_public_key,
@@ -113,6 +113,7 @@ def main():
 
     except Exception as e:
         print(f"ERROR: {e}")
+        raise e
 
 if __name__ == "__main__":
     main()

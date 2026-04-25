@@ -15,8 +15,17 @@ NONCE_SIZE = 12
 SUPPORTED_ALGORITHMS = "AES-256-GCM"
 TIMEZONE = tzlocal.get_localzone()
 
+#Signing
+def sign_data(private_key, data):
+    return private_key.sign(
+        data,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
 #Asymetric encryption
-
 
 def encrypt_file_key_with_pubkey(file_key, public_key):
     return public_key.encrypt(

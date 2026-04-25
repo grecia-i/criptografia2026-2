@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.main import main, create_user, get_master_key
-from src.parser.parser import build_parser
+from src.main import main, create_user, build_parser
 
 '''
 File shared with 2 users then both can decrypt.
@@ -34,15 +33,17 @@ def test_sharing_and_unauthorized_access(mock_env):
     encrypt_sim = MagicMock(
         command="encrypt",
         input_file=str(test_file),
-        to=["Alice", "Bob"]
+        to=["Alice", "Bob"],
+        sender="Alice"
     )
     
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_sim
-        main()
+        with patch("getpass.getpass", return_value="examplepassword"):
+            main()
 
     vault_file = vault_path / "test.txt"
-    assert vault_file.exists()
+    assert vault_file.exists() # nosec
 
     # Alice can decrypt ? same who shared
     output_alice = tmp_path / "output_alice.txt"
@@ -57,7 +58,7 @@ def test_sharing_and_unauthorized_access(mock_env):
             mock_p.return_value.parse_args.return_value = decrypt_alice
             main()
     
-    assert output_alice.read_text() == content
+    assert output_alice.read_text() == content # nosec
 
     # Bob can decrypt ? the one it was shared to
     output_bob = tmp_path / "output_bob.txt"
@@ -70,9 +71,10 @@ def test_sharing_and_unauthorized_access(mock_env):
         )
         with patch("src.main.build_parser") as mock_p:
             mock_p.return_value.parse_args.return_value = decrypt_bob
-            main()
+            with patch("getpass.getpass", return_value="examplepassword"):
+                main()
 
-    assert output_bob.read_text() == content
+    assert output_bob.read_text() == content # nosec
 
     # Eve shouldn't decrypt
     output_eve = tmp_path / "output_eve.txt"
@@ -99,19 +101,21 @@ def test_wrong_password_cannot_decrypt(mock_env):
     content = "sensitive data 123"
     test_file = tmp_path / "secret.txt"
     test_file.write_text(content)
-
     encrypt_args = MagicMock(
         command="encrypt",
         input_file=str(test_file),
-        to=["Alice"]
+        to=["Alice"],
+        sender="Alice"
     )
     with patch("getpass.getpass", return_value="correctpassword"), \
          patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_args
-        main()
+        
+        with patch("getpass.getpass", return_value="correctpassword"):
+            main()
 
     vault_file = vault_path / "secret.txt"
-    assert vault_file.exists()
+    assert vault_file.exists() # nosec
 
     output_file = tmp_path / "output_alice.txt"
     decrypt_args = MagicMock(
