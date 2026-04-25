@@ -46,10 +46,11 @@ def find_sender_key(sender_id: str, users_path="users"):
         pub_path = os.path.join(users_path, username, "public.pem")
         if not os.path.isfile(pub_path):
             continue
-        try:
-            pub = load_public_key(pub_path)
-        except Exception:
-            continue
+        # try:
+        #     pub = load_public_key(pub_path)
+        # except Exception:
+        #     continue
+        pub = load_public_key(pub_path)
  
         if get_key_id(pub) == sender_id:
             return pub
