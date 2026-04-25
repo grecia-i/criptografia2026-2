@@ -17,7 +17,6 @@ def mock_env(tmp_path):
     with patch("src.main.USERS_PATH", str(users_path)), \
          patch("src.main.VAULT_PATH", str(vault_path)):
         yield tmp_path, users_path, vault_path
-             
 
 def test_sharing_and_unauthorized_access(mock_env):
     tmp_path, users_path, vault_path = mock_env
@@ -85,10 +84,11 @@ def test_sharing_and_unauthorized_access(mock_env):
         )
         with patch("src.main.build_parser") as mock_p:
             mock_p.return_value.parse_args.return_value = decrypt_args
-            with pytest.raises(Exception):
-                main()
+            main()
 
+    assert not output_eve.exists(), "Eve no debe poder descifrar el archivo"
 
+# Wrong private key then fails
 def test_wrong_password_cannot_decrypt(mock_env):
     tmp_path, users_path, vault_path = mock_env
 
@@ -122,7 +122,10 @@ def test_wrong_password_cannot_decrypt(mock_env):
     with patch("getpass.getpass", return_value="wrongpassword"), \
          patch("src.main.build_parser") as mock_p:
         mock_p.return_value.parse_args.return_value = decrypt_args
-        with pytest.raises(Exception):
-            main()
+        main()
 
+<<<<<<< HEAD
     assert not output_file.exists(), "El archivo resultante no se genera cuando el descifrado falla" # nosec
+=======
+    assert not output_file.exists(), "El archivo resultante no se genera cuando el descifrado falla"
+>>>>>>> origin/lucia
