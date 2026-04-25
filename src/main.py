@@ -136,7 +136,7 @@ def main():
                 os.path.join(user_dir, "public.pem")
             )
             my_id = get_key_id(public_key)
-            decrypt_container(vault_container, args.output_file, private_key, my_id)
+            decrypt_container(vault_container, args.output_file, private_key, my_id, USERS_PATH)
 
             print("Container decryption successful, contents written to: ", args.output_file)
 

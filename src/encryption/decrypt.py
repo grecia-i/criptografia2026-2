@@ -41,7 +41,7 @@ def decrypt_file_key_with_privkey(encrypted_key, private_key):
     )
 
 #def decrypt_container(container_dir, output_file, derived_key):
-def decrypt_container(container_dir, output_file, private_key, my_id): 
+def decrypt_container(container_dir, output_file, private_key, my_id, users_path): 
     with open(os.path.join(container_dir, "header.json"), "rb") as f:
         header_bytes = f.read()
 
@@ -75,8 +75,8 @@ def decrypt_container(container_dir, output_file, private_key, my_id):
     sender_key = None
 
     # TODO revisar esta parte, carpetas con id de usuario
-    for username in os.listdir("users"):
-        pub_path = os.path.join("users", username, "public.pem")
+    for username in os.listdir(users_path):
+        pub_path = os.path.join(users_path, username, "public.pem")
         pub = load_public_key(pub_path)
 
         if get_key_id(pub) == sender_id:
