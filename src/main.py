@@ -81,6 +81,21 @@ def main():
             file_name = args.input_file
             validate_input_file(file_name)
             
+            #Firmas
+            sender_dir = os.path.join(USERS_PATH, args.sender)
+            
+            private_key = load_private_key(
+                os.path.join(sender_dir, "private.pem"),
+                getpass.getpass("Sender Password: ")
+            )
+
+            public_key = load_public_key(
+                os.path.join(sender_dir, "public.pem")
+            )
+
+            sender_id = get_key_id(public_key)
+            #/Firmas
+
             vault_container = os.path.join(VAULT_PATH, os.path.basename(file_name))
             validate_encrypt_output(vault_container)
             #print("Vault container = ", vault_container) #debug
@@ -99,7 +114,7 @@ def main():
                     "id": get_key_id(pub),
                     "key": pub
                 })
-            encrypt_file(file_name, vault_container, recipient_public_keys)
+            encrypt_file(file_name, vault_container, recipient_public_keys, private_key, sender_id)
 
             print("Container encryption successful, created at: ", vault_container)
 
@@ -121,7 +136,7 @@ def main():
                 os.path.join(user_dir, "public.pem")
             )
             my_id = get_key_id(public_key)
-            decrypt_container(vault_container, args.output_file, private_key, my_id)
+            decrypt_container(vault_container, args.output_file, private_key, my_id, USERS_PATH)
 
             print("Container decryption successful, contents written to: ", args.output_file)
 

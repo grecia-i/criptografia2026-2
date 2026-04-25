@@ -33,12 +33,14 @@ def test_tampered_recipient_list_fails(mock_env):
     encrypt_args = MagicMock(
         command="encrypt",
         input_file=str(test_file),
-        to=["Alice", "Bob"]
+        to=["Alice", "Bob"],
+        sender="Alice"
     )
 
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_args
-        main()
+        with patch("getpass.getpass", return_value="1234"):
+            main()
 
     container_dir = vault_path / "mensaje.txt"
     assert container_dir.exists()  # nosec

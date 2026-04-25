@@ -34,12 +34,14 @@ def test_sharing_and_unauthorized_access(mock_env):
     encrypt_sim = MagicMock(
         command="encrypt",
         input_file=str(test_file),
-        to=["Alice", "Bob"]
+        to=["Alice", "Bob"],
+        sender="Alice"
     )
     
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_sim
-        main()
+        with patch("getpass.getpass", return_value="examplepassword"):
+            main()
 
     vault_file = vault_path / "test.txt"
     assert vault_file.exists() # nosec
@@ -70,7 +72,8 @@ def test_sharing_and_unauthorized_access(mock_env):
         )
         with patch("src.main.build_parser") as mock_p:
             mock_p.return_value.parse_args.return_value = decrypt_bob
-            main()
+            with patch("getpass.getpass", return_value="examplepassword"):
+                main()
 
     assert output_bob.read_text() == content # nosec
 
@@ -98,16 +101,18 @@ def test_wrong_password_cannot_decrypt(mock_env):
     content = "sensitive data 123"
     test_file = tmp_path / "secret.txt"
     test_file.write_text(content)
-
     encrypt_args = MagicMock(
         command="encrypt",
         input_file=str(test_file),
-        to=["Alice"]
+        to=["Alice"],
+        sender="Alice"
     )
     with patch("getpass.getpass", return_value="correctpassword"), \
          patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_args
-        main()
+        
+        with patch("getpass.getpass", return_value="correctpassword"):
+            main()
 
     vault_file = vault_path / "secret.txt"
     assert vault_file.exists() # nosec
@@ -122,7 +127,7 @@ def test_wrong_password_cannot_decrypt(mock_env):
     with patch("getpass.getpass", return_value="wrongpassword"), \
          patch("src.main.build_parser") as mock_p:
         mock_p.return_value.parse_args.return_value = decrypt_args
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             main()
 
     assert not output_file.exists(), "El archivo resultante no se genera cuando el descifrado falla" # nosec
