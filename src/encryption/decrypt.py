@@ -2,7 +2,6 @@ import os
 import json
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
-from warnings import deprecated
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from encryption.keys import load_public_key, get_key_id
@@ -59,13 +58,6 @@ def find_sender_key(sender_id: str, users_path="users"):
         f"Sender public key not found (id={sender_id!r}). "
         "El sender debe ser un usuario registrado."
     )
-
-
-@deprecated("")
-def read_key(path):
-    with open(path, "rb") as key_file:
-        key = key_file.read()
-    return key
 
 
 #def decrypt_container(container_dir, output_file, derived_key):

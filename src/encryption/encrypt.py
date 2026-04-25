@@ -9,7 +9,6 @@ from encryption.keys import load_public_key, get_key_id
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
-from warnings import deprecated
 
 KEY_SIZE = 256
 NONCE_SIZE = 12
