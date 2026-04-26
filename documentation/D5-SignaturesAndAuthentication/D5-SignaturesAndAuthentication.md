@@ -19,12 +19,17 @@ Los datos que se firman después de cifrar son los metadatos junto con el texto 
 
 ### ¿Por qué es necesario hacer hashing antes de firmar?
 
+Es necesario aplicar una función hash antes de firmar porque la firma digital no se realiza directamente sobre el mensaje completo, sino sobre un resumen criptográfico de tamaño fijo (digest). Este resumen se obtiene mediante una función hash segura y posteriormente se firma con la llave privada del emisor. Este enfoque mejora la eficiencia del proceso, ya que permite firmar datos de cualquier tamaño de manera práctica, y garantiza la integridad de la información, debido a que cualquier modificación, incluso mínima, en los datos originales produce un cambio completamente distinto en el hash. En consecuencia, si el contenido es alterado, la verificación de la firma falla, permitiendo detectar manipulaciones de forma confiable.
+
 ## Consideraciones de seguridad
 
 ### ¿Por que se cifra el texto cifrado y no el texto en plano?
+Se firma el texto cifrado porque es la versión que realmente se almacena y se comparte dentro del contenedor. Así, la firma protege exactamente lo que recibirá el destinatario: el archivo cifrado y sus metadatos. Si se firmara solo el texto plano, habría que descifrar primero para verificar la firma, lo cual podría obligar al sistema a procesar información no autenticada. En cambio, al firmar el texto cifrado, el receptor puede comprobar antes de aceptar el contenido que el contenedor no fue alterado y que proviene del emisor esperado. Además, este enfoque mantiene la confidencialidad, porque la firma no revela el contenido original del archivo.
 
 ### ¿Qué pasa si no se verifica la firma primero?
 
 ### ¿Qué pasa si se excluyen los metadatos?
 
 ## Pruebas
+Para confirmar las pruebas se ejecutaron en consola y el resultado fue el esperado. Al igual que las pruebas se encuentran automatizadas en nuestro repositorio.
+<img width="1107" height="261" alt="image" src="https://github.com/user-attachments/assets/9728e716-03d0-4eab-9799-fa820933541a" />
