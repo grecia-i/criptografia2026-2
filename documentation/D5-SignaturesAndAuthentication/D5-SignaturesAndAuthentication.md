@@ -39,3 +39,13 @@ Para confirmar las pruebas se ejecutaron en consola y el resultado fue el espera
 
 ## Referencias
 
+Dworkin, M. (2007). Recommendation for block cipher modes of operation : https://doi.org/10.6028/nist.sp.800-38d
+
+The cryptographic doom principle. (2011, 13 diciembre). Moxie Marlinspike. https://moxie.org/2011/12/13/the-cryptographic-doom-principle.html
+
+RFC 5116: An Interface and Algorithms for Authenticated Encryption. (s. f.). IETF Datatracker. https://datatracker.ietf.org/doc/html/rfc5116
+
+
+
+
+
