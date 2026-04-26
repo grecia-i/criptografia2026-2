@@ -27,6 +27,14 @@ El reporte de este modulo está disponible en:
 
 [Hybrid Encryption](documentation/D3%20-%20Hybrid%20Encryption/HybridEncryption.md)
 
+## Firmas ( D5 )
+
+Se implementó un mecanismo de firmado para el texto cifrado y los metadatos asociados, permitiendo autentificar la identidad del remitente antes de descifrar el archivo.
+
+El reporte de este modulo está disponible en:
+
+[Signatures and authentication](documentation/D5-SignaturesAndAuthentication/D5-SignaturesAndAuthentication.md)
+
 ## Uso del programa
 
 Los comandos se ejecutan desde el directorio raíz del proyecto
@@ -39,7 +47,7 @@ En este punto del desarrollo de se ha implementado un mecanismo para transmitir 
 
 ### Cifrado de archivos
 
-``python -m src.main encrypt <ruta del archivo a cifrar> --to <Lista de usuarios>``
+``python -m src.main encrypt <ruta del archivo a cifrar> --sender <Usuario del remitente> --to <Lista de usuarios>``
 
 La lista de usuarios es una serie de nombres de usuario separada por espacios.
 
@@ -50,3 +58,5 @@ La lista de usuarios es una serie de nombres de usuario separada por espacios.
 Ruta objetivo es el archivo a descifrar, ejemplo ``"\vault_container\test.txt"``
 
 Ruta destino es la ruta donde se creara el archivo descifrado
+
+
