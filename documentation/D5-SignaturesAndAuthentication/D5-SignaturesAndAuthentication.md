@@ -45,6 +45,10 @@ The cryptographic doom principle. (2011, 13 diciembre). Moxie Marlinspike. https
 
 RFC 5116: An Interface and Algorithms for Authenticated Encryption. (s. f.). IETF Datatracker. https://datatracker.ietf.org/doc/html/rfc5116
 
+ Digital Signature Standard (DSS). (2023). NIST. https://doi.org/10.6028/nist.fips.186-5
+
+ 
+
 
 
 
