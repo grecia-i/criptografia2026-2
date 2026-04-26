@@ -35,6 +35,9 @@ Si no se incluyen los metadatos en la firma, solo se está protegiendo el conten
 
 ## Pruebas
 Para confirmar las pruebas se ejecutaron en consola y el resultado fue el esperado. Al igual que las pruebas se encuentran automatizadas en nuestro repositorio.
+
+Estas pruebas confirmaron que el sistema acepta únicamente archivos con firma válida y sin modificaciones, mientras que rechaza cualquier alteración en el contenido cifrado o en los metadatos, así como intentos de verificación con una clave pública incorrecta o la ausencia de la firma. En conjunto, los resultados demuestran que el sistema garantiza la autenticidad e integridad de la información, permitiendo el acceso solo a contenedores legítimos y detectando cualquier manipulación.
+
 <img width="1107" height="261" alt="image" src="https://github.com/user-attachments/assets/9728e716-03d0-4eab-9799-fa820933541a" />
 
 ## Referencias
