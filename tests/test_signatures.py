@@ -63,7 +63,7 @@ def test_signature_and_tampering(mock_env):
     )
     
     if decrypt_container(str(vault_file), str(output_test1), private_key, my_id, str(users_path)):
-        assert output_test1.read_text() == content # the verifying is done inside   # nosec
+        assert output_test1.read_text() == content # nosec
 
     ciphertext_path = vault_file / "ciphertext"
     data = ciphertext_path.read_bytes()
