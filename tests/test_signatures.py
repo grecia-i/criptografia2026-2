@@ -63,7 +63,7 @@ def test_signature_and_tampering(mock_env):
     )
     
     if decrypt_container(str(vault_file), str(output_test1), private_key, my_id, str(users_path)):
-        assert output_test1.read_text() == content # the verifying is done inside
+        assert output_test1.read_text() == content # nosec
 
     ciphertext_path = vault_file / "ciphertext"
     data = ciphertext_path.read_bytes()
@@ -72,4 +72,4 @@ def test_signature_and_tampering(mock_env):
 
     with pytest.raises(ValueError) as tampering:
         decrypt_container(str(vault_file), str(output_test1), private_key, my_id, str(users_path))
-    assert not "Authentication failed: container contents or metadata may have been tampered with" in str(tampering.value)
+    assert not "Authentication failed: container contents or metadata may have been tampered with" in str(tampering.value) # nosec
