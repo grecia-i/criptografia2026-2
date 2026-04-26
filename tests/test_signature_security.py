@@ -29,6 +29,7 @@ def create_signed_container(tmp_path, users_path, vault_path, create_eve=False):
     with patch("getpass.getpass", return_value="examplepassword"):
         create_user("Alice")
         create_user("Bob")
+
         if create_eve:
             create_user("Eve")
 
@@ -49,7 +50,9 @@ def create_signed_container(tmp_path, users_path, vault_path, create_eve=False):
             main()
 
     vault_file = vault_path / "test.txt"
-    assert vault_file.exists()
+
+    if not vault_file.exists():
+        raise AssertionError("Vault container was not created")
 
     return vault_file
 
@@ -83,7 +86,10 @@ def test_modified_metadata_rejected(mock_env):
     header["file_name"] = "archivo_modificado.txt"
     header_path.write_bytes(json.dumps(header, sort_keys=True).encode())
 
-    private_key, my_id, output_file = get_bob_decryption_data(users_path, tmp_path)
+    private_key, my_id, output_file = get_bob_decryption_data(
+        users_path,
+        tmp_path
+    )
 
     with pytest.raises(ValueError):
         decrypt_container(
@@ -101,11 +107,16 @@ def test_signature_removed_rejected(mock_env):
     vault_file = create_signed_container(tmp_path, users_path, vault_path)
 
     signature_path = vault_file / "signature"
-    assert signature_path.exists()
+
+    if not signature_path.exists():
+        raise AssertionError("Signature file was not created")
 
     signature_path.unlink()
 
-    private_key, my_id, output_file = get_bob_decryption_data(users_path, tmp_path)
+    private_key, my_id, output_file = get_bob_decryption_data(
+        users_path,
+        tmp_path
+    )
 
     with pytest.raises(FileNotFoundError):
         decrypt_container(
@@ -132,7 +143,10 @@ def test_wrong_public_key_rejected(mock_env):
 
     alice_public_key.write_bytes(eve_public_key.read_bytes())
 
-    private_key, my_id, output_file = get_bob_decryption_data(users_path, tmp_path)
+    private_key, my_id, output_file = get_bob_decryption_data(
+        users_path,
+        tmp_path
+    )
 
     with pytest.raises(ValueError):
         decrypt_container(
