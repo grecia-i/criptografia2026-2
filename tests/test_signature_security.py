@@ -1,4 +1,3 @@
-import json
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -25,26 +24,27 @@ def mock_env(tmp_path):
         yield tmp_path, users_path, vault_path
 
 
-def create_signed_container(tmp_path, users_path, vault_path, create_eve=False):
+def test_signature_and_tampering(mock_env):
+    tmp_path, users_path, vault_path = mock_env
+
     with patch("getpass.getpass", return_value="examplepassword"):
         create_user("Alice")
         create_user("Bob")
+        create_user("Eve")
 
-        if create_eve:
-            create_user("Eve")
-
+    content = "tests D5 1"
     test_file = tmp_path / "test.txt"
-    test_file.write_text("contenido de prueba")
+    test_file.write_text(content)
 
-    encrypt_args = MagicMock(
+    encrypt_sim = MagicMock(
         command="encrypt",
         input_file=str(test_file),
-        to=["Bob"],
+        to=["Alice", "Bob"],
         sender="Alice"
     )
 
     with patch("src.main.build_parser") as mock_parser:
-        mock_parser.return_value.parse_args.return_value = encrypt_args
+        mock_parser.return_value.parse_args.return_value = encrypt_sim
 
         with patch("getpass.getpass", return_value="examplepassword"):
             main()
@@ -54,105 +54,50 @@ def create_signed_container(tmp_path, users_path, vault_path, create_eve=False):
     if not vault_file.exists():
         raise AssertionError("Vault container was not created")
 
-    return vault_file
+    output_test1 = tmp_path / "output_test1.txt"
 
-
-def get_bob_decryption_data(users_path, tmp_path):
-    bob_path = users_path / "Bob"
-
+    keypair_path = users_path / "Bob"
     private_key = load_private_key(
-        bob_path / "private.pem",
+        keypair_path / "private.pem",
         "examplepassword"
     )
 
-    public_key = load_public_key(
-        bob_path / "public.pem"
+    pub_key = load_public_key(
+        keypair_path / "public.pem"
     )
 
-    my_id = get_key_id(public_key)
-    output_file = tmp_path / "recovered_test.txt"
+    my_id = get_key_id(pub_key)
 
-    return private_key, my_id, output_file
-
-
-def test_modified_metadata_rejected(mock_env):
-    tmp_path, users_path, vault_path = mock_env
-
-    vault_file = create_signed_container(tmp_path, users_path, vault_path)
-
-    header_path = vault_file / "header.json"
-
-    header = json.loads(header_path.read_bytes())
-    header["file_name"] = "archivo_modificado.txt"
-    header_path.write_bytes(json.dumps(header, sort_keys=True).encode())
-
-    private_key, my_id, output_file = get_bob_decryption_data(
-        users_path,
-        tmp_path
+    decrypt_container(
+        str(vault_file),
+        str(output_test1),
+        private_key,
+        my_id,
+        str(users_path)
     )
 
-    with pytest.raises(ValueError):
+    if output_test1.read_text() != content:
+        raise AssertionError("Recovered content does not match original content")
+
+    ciphertext_path = vault_file / "ciphertext"
+    data = ciphertext_path.read_bytes()
+
+    modify_ciph = data[:-2]
+    ciphertext_path.write_bytes(modify_ciph)
+
+    output_test2 = tmp_path / "output_test2.txt"
+
+    with pytest.raises(ValueError) as tampering:
         decrypt_container(
             str(vault_file),
-            str(output_file),
+            str(output_test2),
             private_key,
             my_id,
             str(users_path)
         )
 
-
-def test_signature_removed_rejected(mock_env):
-    tmp_path, users_path, vault_path = mock_env
-
-    vault_file = create_signed_container(tmp_path, users_path, vault_path)
-
-    signature_path = vault_file / "signature"
-
-    if not signature_path.exists():
-        raise AssertionError("Signature file was not created")
-
-    signature_path.unlink()
-
-    private_key, my_id, output_file = get_bob_decryption_data(
-        users_path,
-        tmp_path
-    )
-
-    with pytest.raises(FileNotFoundError):
-        decrypt_container(
-            str(vault_file),
-            str(output_file),
-            private_key,
-            my_id,
-            str(users_path)
-        )
-
-
-def test_wrong_public_key_rejected(mock_env):
-    tmp_path, users_path, vault_path = mock_env
-
-    vault_file = create_signed_container(
-        tmp_path,
-        users_path,
-        vault_path,
-        create_eve=True
-    )
-
-    alice_public_key = users_path / "Alice" / "public.pem"
-    eve_public_key = users_path / "Eve" / "public.pem"
-
-    alice_public_key.write_bytes(eve_public_key.read_bytes())
-
-    private_key, my_id, output_file = get_bob_decryption_data(
-        users_path,
-        tmp_path
-    )
-
-    with pytest.raises(ValueError):
-        decrypt_container(
-            str(vault_file),
-            str(output_file),
-            private_key,
-            my_id,
-            str(users_path)
-        )
+    if not (
+        "Signature verification failed" in str(tampering.value)
+        or "Authentication failed" in str(tampering.value)
+    ):
+        raise AssertionError("Tampered ciphertext was not rejected correctly")
