@@ -36,7 +36,12 @@ def build_parser():
         required=True,
         help="Authorized user list, separated by spaces"
     )
-
+    
+    encrypt_parser.add_argument(
+        "--sender",
+        required=True,
+        help="Username of the person sending/signing the file"
+    )
 
     #Decrypt
     decrypt_parser = subparsers.add_parser(
