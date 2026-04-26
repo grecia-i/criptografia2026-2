@@ -27,9 +27,15 @@ Es necesario aplicar una función hash antes de firmar porque la firma digital n
 Se firma el texto cifrado porque es la versión que realmente se almacena y se comparte dentro del contenedor. Así, la firma protege exactamente lo que recibirá el destinatario: el archivo cifrado y sus metadatos. Si se firmara solo el texto plano, habría que descifrar primero para verificar la firma, lo cual podría obligar al sistema a procesar información no autenticada. En cambio, al firmar el texto cifrado, el receptor puede comprobar antes de aceptar el contenido que el contenedor no fue alterado y que proviene del emisor esperado. Además, este enfoque mantiene la confidencialidad, porque la firma no revela el contenido original del archivo.
 
 ### ¿Qué pasa si no se verifica la firma primero?
+Si no se verifica la firma primero, el sistema podría procesar un archivo que no ha sido autenticado. Esto significa que podría intentar descifrar o aceptar un contenedor alterado, falso o creado por una persona no autorizada. Por lo que se pierde la garantía de origen e integridad: ya no se puede asegurar quién creó el archivo ni si el contenido o los metadatos fueron modificados. Además, manejar datos sin verificar puede provocar fallos, validaciones tardías o incluso vulnerabilidades, ya que el sistema estaría operando sobre información alterada antes de detectar el problema. Por ello, es fundamental comprobar la firma antes de confiar en cualquier contenido del contenedor.
 
 ### ¿Qué pasa si se excluyen los metadatos?
+
+Si no se incluyen los metadatos en la firma, solo se está protegiendo el contenido cifrado, pero no la información que lo acompaña. Por ejemplo, podrían alterarse datos como el nombre del archivo, el tamaño, el algoritmo usado, el identificador del emisor, la lista de destinatarios o cualquier información de control sin invalidar la firma. Esto permitiría manipular el contexto del archivo aunque el ciphertext no cambie. Por eso es importante que los metadatos también estén protegidos: así, cualquier cambio en esa información hace que la verificación falle y el archivo sea rechazado.
 
 ## Pruebas
 Para confirmar las pruebas se ejecutaron en consola y el resultado fue el esperado. Al igual que las pruebas se encuentran automatizadas en nuestro repositorio.
 <img width="1107" height="261" alt="image" src="https://github.com/user-attachments/assets/9728e716-03d0-4eab-9799-fa820933541a" />
+
+## Referencias
+
