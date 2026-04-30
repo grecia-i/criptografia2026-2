@@ -6,6 +6,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.exceptions import InvalidSignature
 from src.encryption.keys import load_public_key, get_key_id
+from cryptography.exceptions import InvalidSignature
+from src.encryption.keys import load_public_key, get_key_id
 
 SUPPORTED_ALGORITHMS = "AES-256-GCM"
 
@@ -40,6 +42,31 @@ def decrypt_file_key_with_privkey(encrypted_key, private_key):
         )
     )
 
+ 
+def find_sender_key(sender_id: str, users_path="users"):
+    """Recorre users_path y retorna la public key cuyo fingerprint coincide."""
+    if not os.path.isdir(users_path):
+        raise FileNotFoundError(f"Users directory not found: {users_path}")
+ 
+    for username in os.listdir(users_path):
+        pub_path = os.path.join(users_path, username, "public.pem")
+        if not os.path.isfile(pub_path):
+            continue
+        # try:
+        #     pub = load_public_key(pub_path)
+        # except Exception:
+        #     continue
+        pub = load_public_key(pub_path)
+ 
+        if get_key_id(pub) == sender_id:
+            return pub
+ 
+    raise ValueError(
+        f"Sender public key not found (id={sender_id!r}). "
+        "El sender debe ser un usuario registrado."
+    )
+
+
 #def decrypt_container(container_dir, output_file, derived_key):
 def decrypt_container(container_dir, output_file, private_key, my_id, users_path): 
     with open(os.path.join(container_dir, "header.json"), "rb") as f:
@@ -73,8 +100,8 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
         raise ValueError("Missing sender_id")
     
     sender_key = None
-
-    #Todo revisar esta parte, carpetas con id de usuario
+    #users_path = "users"
+    
     for username in os.listdir(users_path):
         pub_path = os.path.join(users_path, username, "public.pem")
         #print("aaaaaaaaaa " + pub_path)
@@ -106,3 +133,5 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
 
     with open(output_file, "wb") as f:
         f.write(plaintext)
+    
+    print(f"Success: File verified and decrypted as '{header.get('file_name', 'recovered_file')}'")
