@@ -134,4 +134,4 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
     with open(output_file, "wb") as f:
         f.write(plaintext)
     
-    print(f"Success: File verified and decrypted as '{header.get('file_name', 'recovered_file')}'")
+    #print(f"Success: saved as '{header.get('file_name', 'recovered_file')}'")

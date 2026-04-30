@@ -67,7 +67,7 @@ def main():
                 raise FileNotFoundError(f"Sender '{args.sender}' not found")
             
             print(f"--- Authentication for Sender: {args.sender} ---")
-            password_sender = getpass.getpass("Enter your password to sign the file: ")
+            password_sender = getpass.getpass("Enter your password: ")
             signer_key = load_private_key(os.path.join(sender_dir, "private.pem"), password_sender)
             
             sender_pub = load_public_key(os.path.join(sender_dir, "public.pem"))
@@ -93,7 +93,7 @@ def main():
             # 4. Encriptar y FIRMAR
             os.makedirs(vault_container, exist_ok=True)
             encrypt_file(args.input_file, vault_container, recipient_public_keys, signer_key, sender_id)
-            print(f"Success: File encrypted and signed at {vault_container}")
+            print(f"Success: File saved at {vault_container}")
 
         elif args.command == "decrypt":
             validate_container(args.container_dir)
@@ -109,7 +109,7 @@ def main():
             my_id = get_key_id(public_key)
 
             decrypt_container(args.container_dir, args.output_file, private_key, my_id, USERS_PATH)
-            print(f"Success: File verified and decrypted to {args.output_file}")
+            print(f"Success: File saved to {args.output_file}")
 
     except Exception as e:
         print(f"ERROR: {e}")

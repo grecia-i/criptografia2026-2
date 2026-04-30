@@ -109,8 +109,9 @@ def encrypt_file(
         "key_length": KEY_SIZE,
         "time_creation": datetime.now(TIMEZONE).isoformat()
     }
- 
-    header_bytes = json.dumps(header, sort_keys=True).encode()
+    
+    # canonicalization
+    header_bytes = json.dumps(header, sort_keys=True, separators=(',', ':')).encode(encoding='UTF-8')
  
     aesgcm = AESGCM(session_key)
     ciphertext = aesgcm.encrypt(nonce, plaintext, header_bytes)
