@@ -95,7 +95,7 @@ def encrypt_file(
             "id": r["id"],
             "encrypted_key": enc_key.hex()
         })
-    recipients.sort()
+    recipients.sort(key=lambda r: (r["id"], r["user"]))
  
     # sender_id en el header → queda cubierto por la firma
     header = {
