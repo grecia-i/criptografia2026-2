@@ -132,7 +132,10 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
             "Decryption failed: container may have been tampered with"
         )
 
-    with open(output_file, "wb") as f:
+    if os.path.exists(output_file):
+        raise FileExistsError("Invalid output path")
+
+    with open(output_file, "xb") as f:
         f.write(plaintext)
     
     #print(f"Success: saved as '{header.get('file_name', 'recovered_file')}'")
