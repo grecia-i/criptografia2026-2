@@ -116,7 +116,8 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
     signature_input = header_bytes + ciphertext
 
     if not verify_signature(sender_key, signature, signature_input):
-        raise ValueError("Signature verification failed")
+        #raise ValueError("Signature verification failed")
+        raise ValueError("Decryption failed: container may have been tampered with")
 
     #key = decrypt_key(header_bytes, container_dir, derived_key)
     encrypted_key = bytes.fromhex(my_entry["encrypted_key"])
@@ -128,7 +129,7 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
         plaintext = aesgcm.decrypt(nonce, ciphertext, header_bytes)
     except InvalidTag:
         raise ValueError(
-            "Authentication failed: container contents or metadata may have been tampered with"
+            "Decryption failed: container may have been tampered with"
         )
 
     with open(output_file, "wb") as f:
