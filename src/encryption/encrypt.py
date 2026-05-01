@@ -95,6 +95,7 @@ def encrypt_file(
             "id": r["id"],
             "encrypted_key": enc_key.hex()
         })
+    recipients.sort(key=lambda r: (r["id"], r["user"]))
  
     # sender_id en el header → queda cubierto por la firma
     header = {
@@ -109,13 +110,13 @@ def encrypt_file(
         "key_length": KEY_SIZE,
         "time_creation": datetime.now(TIMEZONE).isoformat()
     }
- 
-    header_bytes = json.dumps(header, sort_keys=True).encode()
+    
+    # canonicalization
+    header_bytes = json.dumps(header, sort_keys=True, separators=(',', ':')).encode(encoding='UTF-8')
  
     aesgcm = AESGCM(session_key)
     ciphertext = aesgcm.encrypt(nonce, plaintext, header_bytes)
  
-    # Firma cubre metadatos + ciphertext (incluye el GCM tag)
     signature = sign_data(signer_key, header_bytes + ciphertext)
  
     with open(os.path.join(vault_dir, "header.json"), "wb") as f:

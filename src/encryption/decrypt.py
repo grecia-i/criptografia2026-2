@@ -6,6 +6,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.exceptions import InvalidSignature
 from src.encryption.keys import load_public_key, get_key_id
+from cryptography.exceptions import InvalidSignature
+from src.encryption.keys import load_public_key, get_key_id
 
 SUPPORTED_ALGORITHMS = "AES-256-GCM"
 
@@ -24,6 +26,10 @@ def verify_signature(public_key, signature, data):
         return True
     except InvalidSignature:
         return False
+        # raise ValueError(
+        #     "Authentication failed: Invalid signature"
+        # )
+        
 
 #Asymetric encryption
 def decrypt_file_key_with_privkey(encrypted_key, private_key):
@@ -62,75 +68,71 @@ def find_sender_key(sender_id: str, users_path="users"):
 
 
 #def decrypt_container(container_dir, output_file, derived_key):
-def decrypt_container(container_dir:str, output_file:str, private_key:str, my_id:str, users_path="users") -> None: 
-
+def decrypt_container(container_dir, output_file, private_key, my_id, users_path): 
     with open(os.path.join(container_dir, "header.json"), "rb") as f:
         header_bytes = f.read()
-    
+
+    header = json.loads(header_bytes)
+    my_entry = None
+    for r in header["recipients"]:
+        if r["id"] == my_id:
+            my_entry = r
+            break
+
+    if my_entry is None:
+        raise ValueError("You are not an authorized recipient")
+
+    if header.get("algorithm") != SUPPORTED_ALGORITHMS:
+        raise ValueError("Unsupported encryption algorithm")
+
     with open(os.path.join(container_dir, "nonce"), "rb") as f:
         nonce = f.read()
 
     with open(os.path.join(container_dir, "ciphertext"), "rb") as f:
         ciphertext = f.read()
 
-    with open(os.path.join(container_dir, "signature"),"rb") as f:
+    #Signing
+    with open(os.path.join(container_dir, "signature"), "rb") as f:
         signature = f.read()
-
-    header = json.loads(header_bytes)
-
-    sender_id = header.get ("sender_id")
-
-    if header.get("algorithm") not in SUPPORTED_ALGORITHMS:
-        raise ValueError(f"Unsupported algorithm: {header.get('algorithm')!r}")
-
+    
+    sender_id = header.get("sender_id")
     if not sender_id:
-        raise ValueError("Security Error: Missing sender_id in metadata.")
-
-    # Localizar la llave pública del remitente para verificar la firma
-    # Se busca en la carpeta de usuarios basándose en el sender_id del header
+        raise ValueError("Missing sender_id")
+    
     sender_key = None
     #users_path = "users"
     
     for username in os.listdir(users_path):
         pub_path = os.path.join(users_path, username, "public.pem")
-        if os.path.exists(pub_path):
-            pub = load_public_key(pub_path)
-            if get_key_id(pub) == sender_id:
-                sender_key = pub
-                break
+        #print("aaaaaaaaaa " + pub_path)
+        pub = load_public_key(pub_path)
+
+        if get_key_id(pub) == sender_id:
+            sender_key = pub
+            break
 
     if sender_key is None:
-        raise ValueError(f"Verification Failed: Public key for sender '{sender_id}' not found.")
-
-    # Origin Authentication & Integrity)
-    # Firmamos Header + Ciphertext para asegurar que NADA se modificado
+        raise ValueError("Sender public key not found")
     signature_input = header_bytes + ciphertext
-    sender_key = find_sender_key(sender_id, users_path)
 
     if not verify_signature(sender_key, signature, signature_input):
-        raise ValueError("SECURITY ALERT: Signature verification failed! The file is forged or tampered.")
+        #raise ValueError("Signature verification failed")
+        raise ValueError("Decryption failed: container may have been tampered with")
 
-    # el usuario actual es un destinatario autorizado?
-    my_entry = next((r for r in header["recipients"] if r["id"] == my_id), None)
-    if not my_entry:
-        raise ValueError("Access Denied: You are not an authorized recipient for this file.")
+    #key = decrypt_key(header_bytes, container_dir, derived_key)
+    encrypted_key = bytes.fromhex(my_entry["encrypted_key"])
+    key = decrypt_file_key_with_privkey(encrypted_key, private_key)
 
-    # Descifrar la llave simétrica (File Key)
-    try:
-        encrypted_key = bytes.fromhex(my_entry["encrypted_key"])
-        session_key = decrypt_file_key_with_privkey(encrypted_key, private_key)
-    except (KeyError, ValueError) :
-        raise ValueError("Decryption Failed: Could not recover the symmetric key.")
+    aesgcm = AESGCM(key)
 
-    # Descifrado Simétrico (AES-GCM)
-    aesgcm = AESGCM(session_key)
     try:
         plaintext = aesgcm.decrypt(nonce, ciphertext, header_bytes)
     except InvalidTag:
-        raise ValueError("Integrity Error: Ciphertext or metadata authentication tag mismatch.")
+        raise ValueError(
+            "Decryption failed: container may have been tampered with"
+        )
 
-    # Escribir el archivo recuperado
     with open(output_file, "wb") as f:
         f.write(plaintext)
     
-    print(f"Success: File verified and decrypted as '{header.get('file_name', 'recovered_file')}'")
+    #print(f"Success: saved as '{header.get('file_name', 'recovered_file')}'")
