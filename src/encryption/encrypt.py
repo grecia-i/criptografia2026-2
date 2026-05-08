@@ -115,9 +115,9 @@ def encrypt_file(
     header_bytes = json.dumps(header, sort_keys=True, separators=(',', ':')).encode(encoding='UTF-8')
  
     aesgcm = AESGCM(session_key)
-    ciphertext = aesgcm.encrypt(nonce, plaintext, header_bytes)
+    ciphertext = aesgcm.encrypt(nonce, plaintext, header_bytes + nonce)
  
-    signature = sign_data(signer_key, header_bytes + ciphertext)
+    signature = sign_data(signer_key, header_bytes + nonce + ciphertext)
  
     with open(os.path.join(vault_dir, "header.json"), "wb") as f:
         f.write(header_bytes)
