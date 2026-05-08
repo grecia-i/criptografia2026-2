@@ -113,7 +113,7 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
 
     if sender_key is None:
         raise ValueError("Sender public key not found")
-    signature_input = header_bytes + ciphertext
+    signature_input = header_bytes + nonce + ciphertext
 
     if not verify_signature(sender_key, signature, signature_input):
         #raise ValueError("Signature verification failed")
@@ -126,7 +126,7 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
     aesgcm = AESGCM(key)
 
     try:
-        plaintext = aesgcm.decrypt(nonce, ciphertext, header_bytes)
+        plaintext = aesgcm.decrypt(nonce, ciphertext, header_bytes + nonce)
     except InvalidTag:
         raise ValueError(
             "Decryption failed: container may have been tampered with"
