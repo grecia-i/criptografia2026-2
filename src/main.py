@@ -111,9 +111,8 @@ def main():
             decrypt_container(args.container_dir, args.output_file, private_key, my_id, USERS_PATH)
             print(f"Success: File saved to {args.output_file}")
 
-    except Exception as e:
-        print(f"ERROR: {e}")
-        raise e
+    except Exception:
+    print("ERROR: Operation failed")
 
 if __name__ == "__main__":
     main()
