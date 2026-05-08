@@ -69,73 +69,82 @@ def find_sender_key(sender_id: str, users_path="users"):
 
 #def decrypt_container(container_dir, output_file, derived_key):
 def decrypt_container(container_dir, output_file, private_key, my_id, users_path): 
-    with open(os.path.join(container_dir, "header.json"), "rb") as f:
-        header_bytes = f.read()
-
-    header = json.loads(header_bytes)
-    my_entry = None
-    for r in header["recipients"]:
-        if r["id"] == my_id:
-            my_entry = r
-            break
-
-    if my_entry is None:
-        raise ValueError("You are not an authorized recipient")
-
-    if header.get("algorithm") != SUPPORTED_ALGORITHMS:
-        raise ValueError("Unsupported encryption algorithm")
-
-    with open(os.path.join(container_dir, "nonce"), "rb") as f:
-        nonce = f.read()
-
-    with open(os.path.join(container_dir, "ciphertext"), "rb") as f:
-        ciphertext = f.read()
-
-    #Signing
-    with open(os.path.join(container_dir, "signature"), "rb") as f:
-        signature = f.read()
-    
-    sender_id = header.get("sender_id")
-    if not sender_id:
-        raise ValueError("Missing sender_id")
-    
-    sender_key = None
-    #users_path = "users"
-    
-    for username in os.listdir(users_path):
-        pub_path = os.path.join(users_path, username, "public.pem")
-        #print("aaaaaaaaaa " + pub_path)
-        pub = load_public_key(pub_path)
-
-        if get_key_id(pub) == sender_id:
-            sender_key = pub
-            break
-
-    if sender_key is None:
-        raise ValueError("Sender public key not found")
-    signature_input = header_bytes + ciphertext
-
-    if not verify_signature(sender_key, signature, signature_input):
-        #raise ValueError("Signature verification failed")
-        raise ValueError("Decryption failed: container may have been tampered with")
-
-    #key = decrypt_key(header_bytes, container_dir, derived_key)
-    encrypted_key = bytes.fromhex(my_entry["encrypted_key"])
-    key = decrypt_file_key_with_privkey(encrypted_key, private_key)
-
-    aesgcm = AESGCM(key)
-
     try:
-        plaintext = aesgcm.decrypt(nonce, ciphertext, header_bytes)
-    except InvalidTag:
-        raise ValueError(
-            "Decryption failed: container may have been tampered with"
-        )
-
-    if os.path.exists(output_file):
-        raise FileExistsError("Invalid output path")
-
-    with open(output_file, "xb") as f:
-        f.write(plaintext)
+        with open(os.path.join(container_dir, "header.json"), "rb") as f:
+            header_bytes = f.read()
+            
+        header = json.loads(header_bytes)
     
-    #print(f"Success: saved as '{header.get('file_name', 'recovered_file')}'")
+        if header.get("algorithm") != SUPPORTED_ALGORITHMS:
+            raise ValueError("Invalid container")
+            
+        with open(os.path.join(container_dir, "nonce"), "rb") as f:
+            nonce = f.read()
+    
+        if len(nonce) != 12:
+            raise ValueError("Invalid container")
+    
+        with open(os.path.join(container_dir, "ciphertext"), "rb") as f:
+            ciphertext = f.read()
+    
+        #Signing
+        with open(os.path.join(container_dir, "signature"), "rb") as f:
+            signature = f.read()
+    
+        sender_id = header.get("sender_id")
+        if not sender_id:
+            raise ValueError("Invalid container")
+    
+        sender_key = None
+    
+        #users_path = "users"
+        
+        for username in os.listdir(users_path):
+            pub_path = os.path.join(users_path, username, "public.pem")
+            #print("aaaaaaaaaa " + pub_path)
+            pub = load_public_key(pub_path)
+    
+            if get_key_id(pub) == sender_id:
+                sender_key = pub
+                break
+    
+        if sender_key is None:
+            raise ValueError("Sender public key not found")
+            
+        signature_input = header_bytes + ciphertext
+    
+        if not verify_signature(sender_key, signature, signature_input):
+            #raise ValueError("Signature verification failed")
+            raise ValueError("Invalid Container")
+            
+        my_entry = None
+        for r in header["recipients"]:
+            if r["id"] == my_id:
+                my_entry = r
+                break
+    
+        if my_entry is None:
+            raise ValueError("Invalid Container")
+        
+        #key = decrypt_key(header_bytes, container_dir, derived_key)
+        encrypted_key = bytes.fromhex(my_entry["encrypted_key"])
+        key = decrypt_file_key_with_privkey(encrypted_key, private_key)
+    
+        aesgcm = AESGCM(key)
+    
+        try:
+            plaintext = aesgcm.decrypt(nonce, ciphertext, header_bytes)
+        except InvalidTag:
+            raise ValueError(
+                "Decryption failed: invalid or tampered container"
+            )
+    
+        if os.path.exists(output_file):
+            raise FileExistsError("Invalid output path")
+    
+        with open(output_file, "xb") as f:
+            f.write(plaintext)
+        
+        #print(f"Success: saved as '{header.get('file_name', 'recovered_file')}'")
+    except Exception:
+        raise ValueError("Decryption failed: Invalid o tampered container")
