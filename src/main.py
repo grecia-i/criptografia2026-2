@@ -112,7 +112,7 @@ def main():
             print(f"Success: File saved to {args.output_file}")
 
     except Exception:
-    print("ERROR: Operation failed")
+        print("ERROR: Operation failed")
 
 if __name__ == "__main__":
     main()
