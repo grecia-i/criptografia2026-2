@@ -47,6 +47,7 @@ def create_keystore(private_key, password: str, keystore_path: str, key_id: str)
 
     ciphertext = aesgcm.encrypt(nonce, pem, None)
 
+    #TODO Verificar keystore
     keystore = {
         "version": 1,
         "kdf": "scrypt",
