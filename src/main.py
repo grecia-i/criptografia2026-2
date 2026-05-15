@@ -1,6 +1,7 @@
 import os
 import getpass
 import secrets
+from pathlib import Path
 from src.encryption.encrypt import encrypt_file
 from src.encryption.decrypt import decrypt_container
 from src.encryption.keys import (
@@ -33,6 +34,7 @@ def create_user(username):
     confirm = getpass.getpass("Confirm password: ")
 
     if password != confirm or not password:
+        (Path("users")/username).rmdir()
         raise ValueError("Invalid password")
 
     private_key, public_key = generate_key_pair()
