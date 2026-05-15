@@ -3,14 +3,16 @@ import os
 import secrets
 from datetime import datetime
 
-from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import serialization
 from cryptography.exceptions import InvalidTag
 
-KDF_N = 2**14       #CPU cost
-KDF_R = 8           #Tamaño de bloque
-KDF_P = 1           #Paralelización
+#KDF_N = 2**14       #CPU cost
+#KDF_R = 8           #Tamaño de bloque
+KDF_P = 4           #Paralelización
+KDF_I = 3           #Iteraciones memoria
+KDF_M = 64*1024     #Memory cost 65536
 KEY_LENGTH = 32     
 
 NONCE_LENGTH = 12
@@ -19,15 +21,27 @@ SALT_LENGTH = 16
 
 def derive_key(password: str, salt: bytes):
 
-    kdf = Scrypt(
+    kdf = Argon2id(
         salt=salt,
         length=KEY_LENGTH,
-        n=KDF_N,
-        r=KDF_R,
-        p=KDF_P
+        iterations=KDF_I,
+        lanes=KDF_P,
+        memory_cost=KDF_M,
+        ad=None,
+        secret=None,
     )
 
-    return kdf.derive(password.encode())
+    return kdf.derive(password.encode(encoding='UTF-8'))
+
+
+def aad_keystore(keystore):
+    aad = {}
+    # to maintain integrity in the aad for the keystore
+    for key in sorted(keystore):
+        if key != "encrypted_key" and key != "status":
+            aad[key] = keystore[key]
+    
+    return json.dumps(aad, sort_keys=True, separators=(',', ':')).encode(encoding='UTF-8')
 
 
 def create_keystore(private_key, password: str, keystore_path: str, key_id: str):
@@ -43,30 +57,35 @@ def create_keystore(private_key, password: str, keystore_path: str, key_id: str)
         encryption_algorithm=serialization.NoEncryption()
     )
 
-    aesgcm = AESGCM(aes_key)
+    #aesgcm = AESGCM(aes_key)
 
-    ciphertext = aesgcm.encrypt(nonce, pem, None)
+    #ciphertext = aesgcm.encrypt(nonce, pem, None)
 
-    #TODO Verificar keystore
     keystore = {
         "version": 1,
-        "kdf": "scrypt",
+        "kdf": "Argon2",
         "kdf_parameters": {
-            "n": KDF_N,
-            "r": KDF_R,
-            "p": KDF_P,
+            "iterations": KDF_I,
+            "lanes": KDF_P,
+            "memory_cost": KDF_M,
             "length": KEY_LENGTH
         },
         "salt": salt.hex(),
         "nonce": nonce.hex(),
-        "encrypted_key": ciphertext.hex(),
+        #"encrypted_key": ciphertext.hex(),
         "public_key_id": key_id,
         "created_at": datetime.utcnow().isoformat(),
         "status": "active"
     }
 
+    aad = aad_keystore(keystore)
+    aesgcm = AESGCM(aes_key)
+    ciphertext = aesgcm.encrypt(nonce, pem, aad)
+
+    keystore["encrypted_key"] = ciphertext.hex()
+
     with open(keystore_path, "w") as f:
-        json.dump(keystore, f, indent=4)
+        json.dump(keystore, f, separators=(',', ':'),indent=None)
 
 
 def load_keystore(keystore_path: str, password: str):
@@ -82,11 +101,11 @@ def load_keystore(keystore_path: str, password: str):
     ciphertext = bytes.fromhex(keystore["encrypted_key"])
 
     aes_key = derive_key(password, salt)
-
+    aad = aad_keystore(keystore)
     aesgcm = AESGCM(aes_key)
 
     try:
-        pem = aesgcm.decrypt(nonce, ciphertext, None)
+        pem = aesgcm.decrypt(nonce, ciphertext, aad)
     except InvalidTag:
         raise ValueError(
             "Decryption failed: container may have been tampered with"
