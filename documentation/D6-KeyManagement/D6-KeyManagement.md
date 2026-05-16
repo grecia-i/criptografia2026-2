@@ -123,11 +123,11 @@ Para la prueba de contraseña incorrecta, se intentó descifrar un contenedor pr
 
 ### c) Modified keystore → failure
 
-Se modificó
+Se modificó manualmente el archivo keystore.json, alterando uno de los parámetros almacenados dentro de los metadatos del KDF. Esta modificación simula un intento de manipulación no autorizada sobre el keystore protegido del usuario.
 
 <img width="1365" height="120" alt="image" src="https://github.com/user-attachments/assets/84a39648-8bdc-4961-99b9-af5e9b85fe72" />
 
-Resultado:
+Después se intentó descifrar el contenedor utilizando la contraseña correcta del usuario. Durante la validación, AES-GCM detectó que los datos autenticados ya no coincidían y generó la excepción InvalidTag. Posteriormente, el sistema rechazó el acceso demostrando que cualquier alteración del keystore es detectada automáticamente.
 
 <img width="1391" height="521" alt="image" src="https://github.com/user-attachments/assets/628f8b4f-6f5e-4df3-9222-60fbd53216be" />
 
