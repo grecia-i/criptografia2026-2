@@ -7,4 +7,10 @@ Contribuyentes:
 - Pérez Osorio Luis Eduardo,
 - Rivas Gil María Lucía.
 
-## N
+## ¿Qué pasa si un atacante roba el keystore?
+
+## ¿Qué pasa si la contraseña es débil?
+
+## ¿Qué pasa si el dispositivo está comprometido?
+
+## ¿Qué protege nuestro sistema y contra qué NO protege nuestro sistema?
