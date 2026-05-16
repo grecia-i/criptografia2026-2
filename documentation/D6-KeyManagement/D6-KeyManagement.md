@@ -19,6 +19,10 @@ El robo del keystore sí representa un riesgo si la contraseña del usuario es d
 
 ## ¿Qué pasa si el dispositivo está comprometido?
 
+Si el dispositivo está comprometido, el sistema ya no puede garantizar completamente la seguridad. Aunque el keystore esté cifrado, un atacante con malware, keylogger o acceso al sistema podría capturar la contraseña cuando el usuario la escribe, leer archivos antes o después de cifrarlos, o acceder a la llave privada mientras está temporalmente descifrada en memoria.
+
+Por eso, nuestro sistema protege principalmente contra el robo de archivos almacenados, como el keystore o el contenedor cifrado, pero no protege contra un dispositivo infectado o controlado por un atacante. En ese caso, se debe considerar la llave como comprometida, revocarla, rotarla y generar nuevas llaves para el usuario.
+
 ## ¿Qué protege nuestro sistema y contra qué NO protege nuestro sistema?
 
 ## Key Management Design
@@ -33,3 +37,12 @@ El robo del keystore sí representa un riesgo si la contraseña del usuario es d
 ### ¿Por qué cifrar las llaves privadas?
 ### ¿Qué pasa si la contraseña es débil?
 ### ¿Cuáles son las limitaciones de nuestro sistema?
+
+## Referencias 
+
+Authenticated encryption — Cryptography 49.0.0.dev1 documentation. (s. f.). https://cryptography.io/en/latest/hazmat/primitives/aead
+
+Welcome to pyca/cryptography — Cryptography 49.0.0.dev1 documentation. (s. f.). https://cryptography.io/en/latest
+
+Cybersecurity Framework | NIST. (2026, 8 mayo). NIST. https://www.nist.gov/cyberframework
+
