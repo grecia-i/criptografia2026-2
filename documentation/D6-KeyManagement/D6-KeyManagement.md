@@ -110,7 +110,16 @@ Para la prueba de contraseña correcta e incorrecta ya se tenía una prueba auto
 
 a) Correct password → access granted
 
+Primero se creó un usuario y posteriormente se cifró un archivo utilizando sus llaves criptográficas. Después, se realizó el proceso de descifrado ingresando la contraseña correcta del usuario. El sistema logró cargar correctamente el keystore, derivar la clave mediante Argon2id y descifrar la llave privada protegida con AES-GCM. Una vez validada la autenticidad e integridad de los datos, el sistema permitió el descifrado del contenedor y generó exitosamente el archivo salida_correcta.txt, mostrando el mensaje Success.
+
+<img width="1405" height="231" alt="image" src="https://github.com/user-attachments/assets/fcc79616-5e07-42ec-83d0-90bce68ae60b" />
+
 b) Wrong password → access denied
+
+Para la prueba de contraseña incorrecta, se intentó descifrar un contenedor previamente cifrado utilizando una contraseña diferente a la registrada para el usuario. Durante el proceso, el sistema intentó cargar y descifrar el keystore del usuario, pero al derivarse una clave incorrecta a partir de la contraseña errónea, AES-GCM no pudo validar la autenticidad de los datos y se generó una excepción InvalidTag. Posteriormente, el sistema lanzó el error. Además, se verificó que el archivo de salida salida_wrong.txt no fuera creado, confirmando que el sistema bloqueó completamente el descifrado cuando se utilizó una contraseña inválida.
+
+<img width="1420" height="521" alt="image" src="https://github.com/user-attachments/assets/6571b35e-918f-4839-8189-5141b776c79c" />
+
 
 c) Modified keystore → failure
 
