@@ -134,13 +134,22 @@ Después se intentó descifrar el contenedor utilizando la contraseña correcta 
 
 ### d) Backup → restore works
 
+Para la prueba de respaldo, se utilizó el comando backup-user sobre el usuario que creamos en las anteriores pruebas, indicando como destino la carpeta backup_persona1. El sistema completó correctamente la operación mostrando el mensaje Backup completed.
+Posteriormente, se verificó el contenido de la carpeta de respaldo mediante el comando dir backup_persona1, comprobando que el sistema copió exitosamente los archivos keystore.json y public.pem. Esto demuestra que el sistema puede generar respaldos funcionales de la información criptográfica del usuario sin exponer directamente la llave privada, ya que esta permanece cifrada dentro del keystore.json.
+
 <img width="1406" height="65" alt="image" src="https://github.com/user-attachments/assets/c3833836-f7e3-4ef6-ac75-6431bbcab3fe" />
 
 <img width="1052" height="196" alt="image" src="https://github.com/user-attachments/assets/c893e89b-66d6-450d-aec9-62a50e02a83a" />
 
+Para comprobar el funcionamiento de la restauración, primero se simuló la pérdida del usuario original renombrando su carpeta. Posteriormente, se verificó mediante el comando dir users que el usuario original ya no se encontraba disponible dentro del sistema. Después, se utilizó el comando restore-user indicando como origen la carpeta de respaldo backup_persona1. El sistema completó exitosamente el proceso mostrando el mensaje Restore completed, demostrando que los archivos criptográficos del usuario pueden recuperarse correctamente a partir del respaldo previamente generado.
+
 <img width="1390" height="286" alt="image" src="https://github.com/user-attachments/assets/e274b2a0-482e-458d-a043-bef8e03a6562" />
 
+Finalmente, se verificó nuevamente el contenido del directorio users, observando que el usuario persona1 fue restaurado exitosamente junto al directorio persona1_old utilizado para simular la pérdida original. Esto confirma que el proceso de restauración recuperó correctamente la estructura y los archivos criptográficos necesarios del usuario.
+
 <img width="978" height="192" alt="image" src="https://github.com/user-attachments/assets/64a61d01-6b75-42bf-b84b-6fae667cb871" />
+
+Después de restaurar el usuario, se realizó nuevamente el proceso de descifrado sobre el contenedor y el sistema logró cargar correctamente el keystore restaurado y completar el descifrado, generando el archivo y mostrando el mensaje de éxito. Esta prueba confirma que el respaldo y la restauración conservan correctamente la información criptográfica necesaria para recuperar el acceso a los archivos cifrados.
 
 <img width="1387" height="90" alt="image" src="https://github.com/user-attachments/assets/236c6262-cfaf-49d3-9ffb-ecb557e3487b" />
 
