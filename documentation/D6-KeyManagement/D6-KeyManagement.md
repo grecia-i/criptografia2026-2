@@ -155,6 +155,22 @@ Después de restaurar el usuario, se realizó nuevamente el proceso de descifrad
 
 ### e) Stolen keystore alone → cannot decrypt
 
+Para simular el robo del keystore, se creó un nuevo directorio llamado attacker dentro de la carpeta users. Este directorio representa a un usuario no autorizado que intentará utilizar una copia robada del archivo de llaves.
+
+Posteriormente, se verificó el contenido de la carpeta users, donde se observa la existencia del usuario original, y el nuevo directorio attacker. Esto prepara el escenario para comprobar que un atacante con acceso al keystore robado no puede descifrar sin la contraseña correcta.
+
+<img width="1063" height="392" alt="image" src="https://github.com/user-attachments/assets/81f3a7f6-b172-4751-88b0-6b270983c84f" />
+
+Para continuar la simulación del ataque, se copió el archivo keystore.json hacia el directorio users/attacker. Posteriormente, se verificó el contenido de la carpeta attacker, comprobando que el atacante ahora posee una copia del keystore robado. Por lo que simula que el atacante obtiene acceso al archivo de almacenamiento de llaves del usuario, pero aún no conoce la contraseña necesaria para derivar la clave y descifrar la llave privada protegida.
+
+<img width="1327" height="193" alt="image" src="https://github.com/user-attachments/assets/d7c5c524-0383-42c0-b7a3-862d50c7aff3" />
+
+Finalmente, se intentó descifrar el contenedor utilizando el usuario attacker, quien únicamente poseía una copia robada del keystore.json pero no conocía la contraseña correcta del usuario. Durante el proceso, el sistema intentó derivar la clave de cifrado a partir de la contraseña proporcionada, pero AES-GCM detectó que la autenticación era inválida y generó la excepción InvalidTag.
+
+Como resultado, el sistema rechazó el acceso, impidiendo obtener la llave privada o recuperar el archivo cifrado. Esta prueba demuestra que el robo del keystore.json por sí solo no es suficiente para descifrar la información protegida, ya que el atacante también necesita conocer la contraseña correcta del usuario.
+
+<img width="1402" height="586" alt="image" src="https://github.com/user-attachments/assets/1a359744-32ed-4533-a2b6-b081641f62ce" />
+
 ## Referencias 
 
 Authenticated encryption — Cryptography 49.0.0.dev1 documentation. (s. f.). https://cryptography.io/en/latest/hazmat/primitives/aead
