@@ -134,6 +134,16 @@ Después se intentó descifrar el contenedor utilizando la contraseña correcta 
 
 ### d) Backup → restore works
 
+<img width="1406" height="65" alt="image" src="https://github.com/user-attachments/assets/c3833836-f7e3-4ef6-ac75-6431bbcab3fe" />
+
+<img width="1052" height="196" alt="image" src="https://github.com/user-attachments/assets/c893e89b-66d6-450d-aec9-62a50e02a83a" />
+
+<img width="1390" height="286" alt="image" src="https://github.com/user-attachments/assets/e274b2a0-482e-458d-a043-bef8e03a6562" />
+
+<img width="978" height="192" alt="image" src="https://github.com/user-attachments/assets/64a61d01-6b75-42bf-b84b-6fae667cb871" />
+
+<img width="1387" height="90" alt="image" src="https://github.com/user-attachments/assets/236c6262-cfaf-49d3-9ffb-ecb557e3487b" />
+
 ### e) Stolen keystore alone → cannot decrypt
 
 ## Referencias 
