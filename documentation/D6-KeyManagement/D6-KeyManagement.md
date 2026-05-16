@@ -13,11 +13,9 @@ El atacante no obtiene directamente la llave privada del usuario, porque nuestro
 
 Esto significa que el atacante necesitaría conocer la contraseña correcta para poder derivar la clave y descifrar la llave privada. Además, si intenta modificar el contenido del keystore, AES-GCM puede detectar alteraciones mediante su etiqueta de autenticación. Por lo que en nuestro código, si la validación falla, se lanza un error y no se entrega la llave privada.
 
-Sin embargo, si la contraseña es débil, el atacante podría intentar ataques de fuerza bruta o diccionario offline. Aunque Argon2id hace estos ataques más costosos, la seguridad final también depende de que el usuario utilice una contraseña fuerte.
-
-
-
 ## ¿Qué pasa si la contraseña es débil?
+
+El robo del keystore sí representa un riesgo si la contraseña del usuario es débil, porque el atacante podría intentar ataques offline de fuerza bruta o diccionario. Argon2id ayuda a hacer estos ataques más costosos, la seguridad final depende también de que el usuario use una contraseña fuerte.
 
 ## ¿Qué pasa si el dispositivo está comprometido?
 
