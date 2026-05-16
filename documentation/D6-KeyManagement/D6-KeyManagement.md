@@ -37,11 +37,31 @@ Los parámetros utilizados son: una salt de 16 bytes, una longitud de clave deri
 
 ### Formato de almacenamiento de llaves
 
-Nuestro sistema utiliza un formato estructurado basado en JSON para almacenar las llaves criptográficas de manera segura dentro del keystore. El archivo keystore.json contiene la llave privada cifrada junto con la información necesaria para poder recuperarla únicamente mediante la contraseña correcta del usuario.
-
-El keystore almacena metadatos como el algoritmo KDF, parámetros de derivación, salt, nonce, identificador de la llave pública y estado de la llave. La llave privada nunca se guarda en texto plano; se serializa en formato PEM y se cifra con AES-GCM usando una clave derivada mediante Argon2id. Además, el sistema utiliza AAD para proteger la integridad de los metadatos, permitiendo detectar modificaciones no autorizadas en el archivo.
+Nuestro sistema utiliza un formato estructurado basado en JSON para almacenar las llaves criptográficas de manera segura dentro del keystore. El archivo keystore.json contiene la llave privada cifrada junto con la información necesaria para poder recuperarla únicamente mediante la contraseña correcta del usuario. El keystore almacena metadatos como el algoritmo KDF, parámetros de derivación, salt, nonce, identificador de la llave pública y estado de la llave. La llave privada nunca se guarda en texto plano; se serializa en formato PEM y se cifra con AES-GCM usando una clave derivada mediante Argon2id. Además, el sistema utiliza AAD para proteger la integridad de los metadatos, permitiendo detectar modificaciones no autorizadas en el archivo.
 
 Este diseño permite mantener separadas las llaves públicas y privadas: las llaves públicas se almacenan en archivos public.pem, mientras que las llaves privadas permanecen protegidas dentro del keystore.json. De esta forma, el sistema puede administrar autenticación, cifrado y recuperación de llaves de manera consistente y segura.
+
+Para una mejor visualización, el esquema del formato de almacenamiento de llaves utilizado por el sistema es el siguiente:
+
+users/
+└── <username>/
+    ├── keystore.json
+    │   ├── version
+    │   ├── kdf
+    │   ├── kdf_parameters
+    │   │   ├── iterations
+    │   │   ├── lanes
+    │   │   ├── memory_cost
+    │   │   └── length
+    │   ├── salt
+    │   ├── nonce
+    │   ├── encrypted_key
+    │   ├── public_key_id
+    │   ├── created_at
+    │   └── status
+    └── public.pem
+
+En resumen, el formato de almacenamiento de llaves del sistema se organiza por usuario dentro del directorio users/. Cada usuario tiene una carpeta propia que contiene dos archivos principales: keystore.json y public.pem. El archivo keystore.json almacena la llave privada cifrada en el campo encrypted_key, junto con los elementos anteriormente mencionados. La llave pública se almacena por separado en el archivo public.pem, lo que permite compartirla con otros usuarios sin exponer la llave privada.
 
 ### Estrategia de respaldo
 
