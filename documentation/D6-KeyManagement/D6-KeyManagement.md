@@ -62,8 +62,25 @@ Además, se asume que la librería criptográfica utilizada funciona correctamen
 ## Security Discussion
 
 ### ¿Por qué cifrar las llaves privadas?
+
+Ciframos las llaves privadas porque son el elemento principal que permite al usuario descifrar los archivos protegidos. Si una llave privada se almacenara en texto plano y un atacante lograra robarla, podría usarla para acceder a los archivos cifrados destinados a ese usuario.
+
+En nuestro sistema, la llave privada no se guarda directamente. Primero se convierte a formato PEM y después se cifra con AES-GCM usando una clave derivada de la contraseña del usuario mediante Argon2id. De esta forma, aunque un atacante robe el keystore, no podrá usar la llave privada sin conocer la contraseña correcta. Por lo tanto, cifrar las llaves privadas reduce el riesgo de exposición ante robo de archivos, copias de seguridad comprometidas o acceso no autorizado al almacenamiento. 
+
 ### ¿Qué pasa si la contraseña es débil?
+
+Si la contraseña es débil, el atacante podría intentar adivinarla mediante ataques de fuerza bruta o diccionario, especialmente si ya robó el keystore. Aunque el sistema usa Argon2id para hacer más costoso ese proceso, una contraseña corta, común o reutilizada sigue siendo vulnerable.
+
+En ese caso, si el atacante logra descubrir la contraseña, podría derivar la misma clave de cifrado y descifrar la llave privada almacenada en el keystore. Por eso, la seguridad del sistema no depende sde la boveda, sino también de que el usuario utilice una contraseña fuerte y dificil de adivinar.
+
 ### ¿Cuáles son las limitaciones de nuestro sistema?
+
+Las principales limitaciones de nuestro sistema son que no puede proteger completamente contra contraseñas débiles, dispositivos comprometidos o usuarios que compartan su contraseña o archivos descifrados. Aunque el keystore protege la llave privada, si un atacante obtiene la contraseña correcta, podría descifrar la llave privada.
+
+El sistema tampoco protege contra malware, keyloggers o un atacante con control del sistema operativo, ya que podría capturar la contraseña mientras el usuario la escribe o acceder a la llave privada cuando está temporalmente descifrada en memoria.
+
+Otra vulnerabilidad puede ser que al generar una nueva llave, no se conserva automáticamente un historial de llaves anteriores, por lo que archivos cifrados con llaves antiguas podrían requerir manejo adicional. Y finalmente, el sistema protege los archivos cifrados y el keystore, pero no puede evitar que un usuario autorizado comparta manualmente un archivo después de descifrarlo.
+
 
 ## Referencias 
 
@@ -74,3 +91,7 @@ Welcome to pyca/cryptography — Cryptography 49.0.0.dev1 documentation. (s. f.)
 Cybersecurity Framework | NIST. (2026, 8 mayo). NIST. https://www.nist.gov/cyberframework
 
 Biryukov, A., Dinu, D., Khovratovich, D., & Josefsson, S. (2021, 1 septiembre). RFC 9106: Argon2 Memory-Hard Function for Password Hashing and Proof-of-Work Applications. https://www.rfc-editor.org/rfc/rfc9106.html
+
+Barker, E. (Mayo, 2020). Recommendation for Key Management: Part 1 – General. NIST. https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final
+
+
