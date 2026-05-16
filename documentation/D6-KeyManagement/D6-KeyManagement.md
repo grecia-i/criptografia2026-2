@@ -53,6 +53,12 @@ Para recuperar las llaves, la función restore_keystore() vuelve a copiar esos a
 
 ### Supuestos de seguridad
 
+Nuestro sistema parte de varios supuestos de seguridad necesarios para que la protección de llaves funcione correctamente. Primero, se asume que el usuario utiliza una contraseña fuerte y que no la comparte con terceros. La contraseña es el elemento principal para derivar la clave que protege la llave privada, por lo que una contraseña débil podría permitir ataques de fuerza bruta o diccionario.
+
+También se asume que el dispositivo del usuario no está comprometido al momento de usar el sistema. Si existe malware, keyloggers o control del sistema operativo por parte de un atacante, la contraseña o la llave privada podrían ser capturadas mientras se encuentran en uso. Por ello, el sistema protege principalmente contra el robo de archivos almacenados, pero no contra un entorno ya comprometido.
+
+Además, se asume que la librería criptográfica utilizada funciona correctamente y que los algoritmos implementados, como Argon2id y AES-GCM, se utilizan de forma adecuada. Finalmente, se considera que los respaldos del keystore se almacenan en ubicaciones seguras y que solo los usuarios autorizados tienen acceso a ellos.
+
 ## Security Discussion
 
 ### ¿Por qué cifrar las llaves privadas?
