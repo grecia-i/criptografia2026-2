@@ -25,9 +25,16 @@ Por eso, nuestro sistema protege principalmente contra el robo de archivos almac
 
 ## ¿Qué protege nuestro sistema y contra qué NO protege nuestro sistema?
 
+Nuestro sistema protege contra el robo de archivos almacenados, como el keystore y los contenedores cifrados, ya que las llaves privadas nunca se guardan en texto plano y los archivos se protegen mediante cifrado autenticado. También protege contra modificaciones no autorizadas, porque AES-GCM y las firmas permiten detectar alteraciones. Además, el acceso se limita a los usuarios autorizados mediante llaves públicas y privadas. Sin embargo, el sistema no protege contra contraseñas débiles, dispositivos comprometidos, malware, keyloggers o atacantes que ya tengan acceso al sistema del usuario. Tampoco puede evitar que un usuario autorizado comparta manualmente un archivo después de descifrarlo.
+
 ## Key Management Design
 
 ### Selección del KDF y sus parámetros
+
+Nuestro sistema utiliza Argon2id como función de derivación de claves basada en contraseña (KDF). Argon2id fue seleccionado porque es un KDF moderno diseñado para hacer más costosos los ataques de fuerza bruta, ya que requiere tanto recursos computacionales como memoria. La contraseña del usuario nunca se almacena; en su lugar, se combina con una salt generada aleatoriamente para derivar una clave de cifrado de 256 bits. Esta clave derivada se utiliza posteriormente con AES-GCM para cifrar y descifrar la llave privada del usuario dentro del keystore.
+
+Los parámetros utilizados son: una salt de 16 bytes, una longitud de clave derivada de 32 bytes, 3 iteraciones, 4 lanes de paralelización y un costo de memoria de 64 × 1024 KiB. Estos valores se almacenan dentro de los metadatos del keystore, de manera que el sistema pueda repetir el mismo proceso de derivación cuando el usuario ingrese la contraseña correcta. Este diseño ayuda a proteger la llave privada incluso si el archivo del keystore es robado, aunque la seguridad final también depende de la fortaleza de la contraseña utilizada por el usuario.
+
 ### Formato de almacenamiento de llaves
 ### Estrategia de respaldo
 ### Supuestos de seguridad
@@ -46,3 +53,4 @@ Welcome to pyca/cryptography — Cryptography 49.0.0.dev1 documentation. (s. f.)
 
 Cybersecurity Framework | NIST. (2026, 8 mayo). NIST. https://www.nist.gov/cyberframework
 
+Biryukov, A., Dinu, D., Khovratovich, D., & Josefsson, S. (2021, 1 septiembre). RFC 9106: Argon2 Memory-Hard Function for Password Hashing and Proof-of-Work Applications. https://www.rfc-editor.org/rfc/rfc9106.html
