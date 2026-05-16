@@ -185,8 +185,8 @@ def main():
                 args.input,
                 user_dir
             )
-
             print("Restore completed")
+            
     except Exception as e:
         print(f"ERROR: {e}")
         raise e

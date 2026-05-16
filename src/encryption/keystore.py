@@ -95,6 +95,19 @@ def load_keystore(keystore_path: str, password: str):
 
     if keystore.get("status") == "revoked":
         raise ValueError("Key has been revoked")
+    
+    created_at = keystore.get("created_at")
+    created_date = created_date = datetime.fromisoformat(created_at)
+    now  = datetime.utcnow()
+    exp_date = created_date.replace(year  = created_date.year + 2)
+    if(exp_date >= now):
+        print('\x1b[0;30;41m' + 'Your key has expired, renew it using: rotate-key <user>' + '\x1b[0m')
+        print('\x1b[0;30;41m' + 'Keys can be backed up using: backup-user <user>' + '\x1b[0m')
+        print(exp_date)
+    else:
+        print(exp_date)
+
+    
 
     salt = bytes.fromhex(keystore["salt"])
     nonce = bytes.fromhex(keystore["nonce"])
