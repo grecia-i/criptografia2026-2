@@ -123,6 +123,15 @@ Para la prueba de contraseña incorrecta, se intentó descifrar un contenedor pr
 
 c) Modified keystore → failure
 
+Se modificó
+
+<img width="1365" height="120" alt="image" src="https://github.com/user-attachments/assets/84a39648-8bdc-4961-99b9-af5e9b85fe72" />
+
+Resultado:
+
+<img width="1391" height="521" alt="image" src="https://github.com/user-attachments/assets/628f8b4f-6f5e-4df3-9222-60fbd53216be" />
+
+
 d) Backup → restore works
 
 e) Stolen keystore alone → cannot decrypt
