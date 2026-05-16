@@ -9,6 +9,14 @@ Contribuyentes:
 
 ## ¿Qué pasa si un atacante roba el keystore?
 
+El atacante no obtiene directamente la llave privada del usuario, porque nuestro sistema no almacena las llaves privadas en texto plano. La llave privada se almacena cifrada con AES-GCM y la clave de cifrado se deriva de la contraseña del usuario mediante Argon2id. El keystore contiene salt, nonce, parámetros del KDF y la llave privada cifrada.
+
+Esto significa que el atacante necesitaría conocer la contraseña correcta para poder derivar la clave y descifrar la llave privada. Además, si intenta modificar el contenido del keystore, AES-GCM puede detectar alteraciones mediante su etiqueta de autenticación. Por lo que en nuestro código, si la validación falla, se lanza un error y no se entrega la llave privada.
+
+Sin embargo, si la contraseña es débil, el atacante podría intentar ataques de fuerza bruta o diccionario offline. Aunque Argon2id hace estos ataques más costosos, la seguridad final también depende de que el usuario utilice una contraseña fuerte.
+
+
+
 ## ¿Qué pasa si la contraseña es débil?
 
 ## ¿Qué pasa si el dispositivo está comprometido?
