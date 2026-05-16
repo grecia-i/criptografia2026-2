@@ -103,6 +103,20 @@ El sistema tampoco protege contra malware, keyloggers o un atacante con control 
 
 Otra vulnerabilidad puede ser que al generar una nueva llave, no se conserva automáticamente un historial de llaves anteriores, por lo que archivos cifrados con llaves antiguas podrían requerir manejo adicional. Y finalmente, el sistema protege los archivos cifrados y el keystore, pero no puede evitar que un usuario autorizado comparta manualmente un archivo después de descifrarlo.
 
+## Pruebas
+Para la prueba de contraseña correcta e incorrecta ya se tenía una prueba automatizada en donde poníamos a prueba el acceso al sistema mediante el uso de credenciales válidas y no válidas. Primero se crea un usuario con una contraseña correcta, se cifra un archivo y posteriormente se intenta descifrarlo usando esa misma contraseña, comprobando que el acceso sea concedido y que el archivo recuperado coincida con el contenido original. Después, se realiza otro intento de descifrado utilizando una contraseña incorrecta, verificando que el sistema niegue el acceso, genere un error y no produzca ningún archivo de salida.
+
+<img width="1393" height="111" alt="image" src="https://github.com/user-attachments/assets/dd7305f3-b114-4593-abcd-7aa886070bf5" />
+
+a) Correct password → access granted
+
+b) Wrong password → access denied
+
+c) Modified keystore → failure
+
+d) Backup → restore works
+
+e) Stolen keystore alone → cannot decrypt
 
 ## Referencias 
 
