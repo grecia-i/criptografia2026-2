@@ -27,6 +27,42 @@ Por eso, nuestro sistema protege principalmente contra el robo de archivos almac
 
 Nuestro sistema protege contra el robo de archivos almacenados, como el keystore y los contenedores cifrados, ya que las llaves privadas nunca se guardan en texto plano y los archivos se protegen mediante cifrado autenticado. También protege contra modificaciones no autorizadas, porque AES-GCM y las firmas permiten detectar alteraciones. Además, el acceso se limita a los usuarios autorizados mediante llaves públicas y privadas. Sin embargo, el sistema no protege contra contraseñas débiles, dispositivos comprometidos, malware, keyloggers o atacantes que ya tengan acceso al sistema del usuario. Tampoco puede evitar que un usuario autorizado comparta manualmente un archivo después de descifrarlo.
 
+## Key Lifecycle Definition
+
+### Key generation
+
+La generación de llaves ocurre cuando se crea un nuevo usuario dentro del sistema mediante el comando create-user. En este paso, el sistema genera automáticamente un par de llaves asimétricas RSA compuesto por una llave pública y una llave privada.
+
+La llave pública se almacena en el archivo public.pem, ya que puede ser compartida con otros usuarios para permitir el cifrado de archivos dirigidos a ese destinatario. En cambio, la llave privada se considera información sensible y nunca se almacena en texto plano. Antes de guardarse, se serializa en formato PEM y se cifra con AES-GCM usando una clave derivada de la contraseña del usuario mediante Argon2id.
+
+El sistema también genera un identificador de llave pública a partir de la llave pública. Este identificador permite asociar de manera consistente la llave pública con la llave privada protegida dentro del keystore.json.
+
+### Key usage
+
+Las llaves criptográficas del sistema se utilizan principalmente para proteger y compartir archivos entre usuarios autorizados. La llave pública de cada usuario se usa durante el proceso de cifrado para proteger la clave simétrica del archivo, permitiendo que únicamente los destinatarios autorizados puedan recuperarla posteriormente con su llave privada.
+
+Cuando un usuario cifra un archivo, el sistema genera una clave simétrica temporal para cifrar el contenido mediante AES-GCM. Después, esa clave simétrica se cifra individualmente con la llave pública de cada destinatario autorizado y se almacena dentro del contenedor cifrado.
+
+Durante el proceso de descifrado, el usuario debe ingresar su contraseña para que el sistema pueda derivar la clave mediante Argon2id y descifrar temporalmente su llave privada almacenada en el keystore.json. Una vez recuperada la llave privada, esta se utiliza para descifrar la clave simétrica del archivo y posteriormente recuperar el contenido original.
+
+Además del cifrado y descifrado, las llaves también se utilizan para la generación y validación de firmas digitales. El remitente firma el contenedor utilizando su llave privada y los destinatarios verifican la autenticidad usando la llave pública correspondiente. Esto permite detectar modificaciones no autorizadas y validar el origen del archivo.
+
+### Key rotation (conceptual or minimal implementation)
+
+La rotación de llaves permite reemplazar el par de llaves criptográficas de un usuario por uno nuevo. En nuestro sistema existe una implementación mínima mediante el comando rotate-key, el cual genera un nuevo par de llaves RSA para el usuario seleccionado.
+
+Durante este proceso, el sistema solicita la contraseña del usuario, genera una nueva llave privada y una nueva llave pública, calcula un nuevo identificador de llave pública y actualiza los archivos del usuario. La nueva llave privada se vuelve a proteger dentro del keystore.json, cifrada con AES-GCM mediante una clave derivada de la contraseña del usuario con Argon2id. La nueva llave pública se almacena nuevamente en public.pem.
+
+Esta rotación sería útil cuando se desea renovar periódicamente las llaves o cuando se sospecha que la llave anterior pudo haber sido expuesta. Actualmente, tenemos la limitante de cuando el sistema rota las llaves, las anteriores se reemplazan directamente y no se guardan automáticamente. Esto significa que los archivos cifrados con la llave antigua podrían necesitar volver a cifrarse con la nueva llave pública o mantener temporalmente la llave anterior para seguir pudiendo acceder a ellos.
+
+### Key compromise response
+
+En caso de sospecha o confirmación de compromiso de una llave, el sistema considera que la llave privada del usuario ya no es confiable y debe ser reemplazada. Esto podría ocurrir si un atacante obtiene acceso al dispositivo del usuario, roba la contraseña o logra acceder al keystore.json junto con las credenciales necesarias para descifrarlo.
+
+La respuesta principal del sistema ante este escenario es realizar una rotación de llaves. Después de la rotación, los nuevos archivos cifrados utilizarían la nueva llave pública del usuario. Sin embargo, los archivos protegidos con la llave anterior podrían requerir recifrado o conservación temporal de la llave antigua hasta completar la migración.
+
+Por lo que por el momento nuestro sistema detectar el incidente, generar nuevas llaves, reemplazar las llaves comprometidas y utilizar las nuevas credenciales para futuros procesos de cifrado y autenticación.
+
 ## Key Management Design
 
 ### Selección del KDF y sus parámetros
