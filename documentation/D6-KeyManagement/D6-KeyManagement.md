@@ -43,39 +43,25 @@ Este diseño permite mantener separadas las llaves públicas y privadas: las lla
 
 Para una mejor visualización, el esquema del formato de almacenamiento de llaves utilizado por el sistema es el siguiente:
 
+```text
 users/
-
 └── <username>/
-
     ├── keystore.json
-    
     │   ├── version
-    
     │   ├── kdf
-    
     │   ├── kdf_parameters
-    
     │   │   ├── iterations
-    
     │   │   ├── lanes
-    
     │   │   ├── memory_cost
-    
     │   │   └── length
-    
     │   ├── salt
-    
     │   ├── nonce
-    
     │   ├── encrypted_key
-    
     │   ├── public_key_id
-    
     │   ├── created_at
-    
     │   └── status
-    
     └── public.pem
+```
 
 En resumen, el formato de almacenamiento de llaves del sistema se organiza por usuario dentro del directorio users/. Cada usuario tiene una carpeta propia que contiene dos archivos principales: keystore.json y public.pem. El archivo keystore.json almacena la llave privada cifrada en el campo encrypted_key, junto con los elementos anteriormente mencionados. La llave pública se almacena por separado en el archivo public.pem, lo que permite compartirla con otros usuarios sin exponer la llave privada.
 
