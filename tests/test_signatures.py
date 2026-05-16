@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from cryptography.exceptions import InvalidTag
-from src.main import main, create_user, build_parser, decrypt_container, load_private_key, load_public_key, get_key_id
+from src.main import main, create_user, build_parser, decrypt_container, load_keystore, load_public_key, get_key_id
 
 
 '''
@@ -51,7 +51,7 @@ def test_signature_and_tampering(mock_env):
 
     output_test1 = tmp_path / "output_test1.txt"
     keypair_path = users_path / "Bob" 
-    private_key = load_private_key(keypair_path / "private.pem", "examplepassword")
+    private_key = load_keystore(keypair_path / "keystore.json", "examplepassword")
     pub_key = load_public_key(keypair_path / "public.pem")
     my_id = get_key_id(pub_key)  
 
@@ -72,4 +72,4 @@ def test_signature_and_tampering(mock_env):
 
     with pytest.raises(ValueError) as tampering:
         decrypt_container(str(vault_file), str(output_test1), private_key, my_id, str(users_path))
-    assert not "Authentication failed: container contents or metadata may have been tampered with" in str(tampering.value) # nosec
+    assert not "Authentication failed: container may have been tampered with" in str(tampering.value) # nosec
