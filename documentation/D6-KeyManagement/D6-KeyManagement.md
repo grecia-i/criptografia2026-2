@@ -36,7 +36,21 @@ Nuestro sistema utiliza Argon2id como función de derivación de claves basada e
 Los parámetros utilizados son: una salt de 16 bytes, una longitud de clave derivada de 32 bytes, 3 iteraciones, 4 lanes de paralelización y un costo de memoria de 64 × 1024 KiB. Estos valores se almacenan dentro de los metadatos del keystore, de manera que el sistema pueda repetir el mismo proceso de derivación cuando el usuario ingrese la contraseña correcta. Este diseño ayuda a proteger la llave privada incluso si el archivo del keystore es robado, aunque la seguridad final también depende de la fortaleza de la contraseña utilizada por el usuario.
 
 ### Formato de almacenamiento de llaves
+
+Nuestro sistema utiliza un formato estructurado basado en JSON para almacenar las llaves criptográficas de manera segura dentro del keystore. El archivo keystore.json contiene la llave privada cifrada junto con la información necesaria para poder recuperarla únicamente mediante la contraseña correcta del usuario.
+
+El keystore incluye metadatos como la versión del formato, el algoritmo KDF utilizado, los parámetros de derivación, la salt, el nonce, el identificador de la llave pública (public_key_id), la fecha de creación y el estado de la llave. La llave privada no se almacena en texto plano; primero se serializa en formato PEM y posteriormente se cifra utilizando AES-GCM con una clave derivada mediante Argon2id. Además, el sistema utiliza datos autenticados adicionales (AAD) para proteger la integridad de los metadatos del keystore. Esto significa que si un atacante modifica campos importantes del archivo, AES-GCM detectará la alteración y el sistema rechazará el descifrado.
+
+Este diseño permite mantener separadas las llaves públicas y privadas: las llaves públicas se almacenan en archivos public.pem, mientras que las llaves privadas permanecen protegidas dentro del keystore.json. De esta forma, el sistema puede administrar autenticación, cifrado y recuperación de llaves de manera consistente y segura.
+
 ### Estrategia de respaldo
+
+Nuestro sistema incluye una estrategia de respaldo para permitir la recuperación de las llaves del usuario sin debilitar su seguridad. El respaldo copia únicamente los archivos necesarios para restaurar el acceso criptográfico del usuario: keystore.json y public.pem.
+
+La función backup_keystore() crea una carpeta de respaldo y copia dentro de ella el keystore.json y la llave pública del usuario. Esto no expone directamente la llave privada, porque dentro del keystore.json la llave privada sigue estando cifrada con AES-GCM mediante una clave derivada de la contraseña del usuario con Argon2id.
+
+Para recuperar las llaves, la función restore_keystore() vuelve a copiar esos archivos desde la carpeta de respaldo al directorio del usuario. Sin embargo, el respaldo no permite acceder a la llave privada por sí solo: el usuario todavía necesita ingresar la contraseña correcta para que el sistema pueda derivar la clave y descifrar la llave privada. Es importante considerar que el respaldo debe almacenarse en un lugar seguro, porque si se combina con una contraseña débil o robada, podría representar un riesgo.
+
 ### Supuestos de seguridad
 
 ## Security Discussion
