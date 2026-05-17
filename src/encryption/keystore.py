@@ -2,7 +2,7 @@ import json
 import os
 import secrets
 import getpass
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -75,7 +75,7 @@ def create_keystore(private_key, password: str, keystore_path: str, key_id: str)
         "nonce": nonce.hex(),
         #"encrypted_key": ciphertext.hex(),
         "public_key_id": key_id,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "status": "active"
     }
 
@@ -99,7 +99,7 @@ def load_keystore(keystore_path: str, password: str):
     
     created_at = keystore.get("created_at")
     created_date = created_date = datetime.fromisoformat(created_at)
-    now  = datetime.utcnow()
+    now  = datetime.now(timezone.utc)
     exp_date = created_date.replace(year  = created_date.year + 2)
     if(now >= exp_date):
         print('\x1b[0;30;41m' + 'Your key has expired, renew it using: rotate-key <user>' + '\x1b[0m')
@@ -137,7 +137,7 @@ def revoke_keystore(keystore_path: str):
         keystore = json.load(f)
 
     keystore["status"] = "revoked"
-    keystore["revoked_at"] = datetime.utcnow().isoformat()
+    keystore["revoked_at"] = datetime.now(timezone.utc).isoformat()
 
     with open(keystore_path, "w") as f:
         json.dump(keystore, f, separators=(',', ':'),indent=4)
@@ -151,7 +151,7 @@ def retire_keystore(keystore_path: str):
         return
     
     keystore["status"] = "retired"
-    keystore["retired_at"] = datetime.utcnow().isoformat()
+    keystore["retired_at"] = datetime.now(timezone.utc).isoformat()
 
     with open(keystore_path, "w") as f:
         json.dump(keystore, f, separators=(',', ':'),indent=4)
@@ -171,7 +171,7 @@ def rotate_keys( user_dir: str, old_password: str,
 
     backup_dir = os.path.join(
         user_dir,
-        "archive","bk_" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        "archive","bk_" + datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     )
     backup_keystore(user_dir, backup_dir)
 
