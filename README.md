@@ -35,6 +35,14 @@ El reporte de este modulo está disponible en:
 
 [Signatures and authentication](documentation/D5-SignaturesAndAuthentication/D5-SignaturesAndAuthentication.md)
 
+## Administración de llaves ( D5 )
+
+Para esta entrega se implemento un ciclo de vida para las llaves asimetricas utilizadas para compartir archivos, en conjunto a esto se implemento una serie de mecanismos para administrar de manera segura la generacion y almacenamiento de las llaves privadas en un contenedor seguro mediante el uso de una funcion de derivacion de llave (KDF).
+
+El reporte de este modulo está disponible en:
+
+[Key Management](documentation/D6-KeyManagement/D6-KeyManagement.md)
+
 ## Uso del programa
 
 Los comandos se ejecutan desde el directorio raíz del proyecto
@@ -43,7 +51,7 @@ Los comandos se ejecutan desde el directorio raíz del proyecto
 
 ``python -m src.main create-user <usuario>``
 
-En este punto del desarrollo de se ha implementado un mecanismo para transmitir llaves, todos los usuarios deben ser creados localmente.
+En este punto del desarrollo no se ha implementado un mecanismo para transmitir llaves, todos los usuarios deben ser creados localmente.
 
 ### Cifrado de archivos
 
@@ -53,10 +61,30 @@ La lista de usuarios es una serie de nombres de usuario separada por espacios.
 
 ### Descifrado de archivos
 
-``python -m src.main decrypt --user <nombre> <ruta destino> <ruta objetivo>``
+``python -m src.main decrypt --user <nombre> <ruta origen> <ruta objetivo>``
 
 Ruta objetivo es el archivo a descifrar, ejemplo ``"\vault_container\test.txt"``
 
 Ruta destino es la ruta donde se creara el archivo descifrado
 
+### Administracion de laves
 
+- Rotación de llaves
+
+    Genera un nuevo par de llaves RSA, automáticamente respalda la llave anterior a la bóveda del usuario.
+    ``python -m src.main rotate-key --user <usuario>``
+
+- Revocación de llaves
+
+    Marca una llave como revocada evitando que sea usada por el sistema.
+    ``python -m src.main revoke-key --user <usuario>``
+
+- Respaldo de llaves
+
+    Copia las llaves de un usuario a un directorio objetivo.
+    ``python -m src.main backup-user --user <usuario> --output <ruta objetivo>``
+
+- Restaurar llaves
+
+    Restaura una copia de las llaves de un usuario desde un respaldo previo.
+    ``python -m src.main backup-user --user <usuario> --input <ruta origen>``
