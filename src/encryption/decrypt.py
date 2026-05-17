@@ -80,10 +80,10 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
             break
 
     if my_entry is None:
-        raise ValueError("You are not an authorized recipient")
+        raise ValueError("Decryption failed: container may have been tampered with")
 
     if header.get("algorithm") != SUPPORTED_ALGORITHMS:
-        raise ValueError("Unsupported encryption algorithm")
+        raise ValueError("Decryption failed: container may have been tampered with")
 
     with open(os.path.join(container_dir, "nonce"), "rb") as f:
         nonce = f.read()
@@ -97,7 +97,7 @@ def decrypt_container(container_dir, output_file, private_key, my_id, users_path
     
     sender_id = header.get("sender_id")
     if not sender_id:
-        raise ValueError("Missing sender_id")
+        raise ValueError("Decryption failed: container may have been tampered with")
     
     sender_key = None
     #users_path = "users"

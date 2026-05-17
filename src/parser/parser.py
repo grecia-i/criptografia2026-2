@@ -17,6 +17,60 @@ def build_parser():
         help = "Create a new user")
     user_parser.add_argument("username", type=str)
 
+    # Rotate keys
+    rotate_parser = subparsers.add_parser(
+        "rotate-key",
+        help="Rotate user key pair"
+    )
+
+    rotate_parser.add_argument(
+        "--user",
+        required=True
+    )
+
+    # Revoke keys
+    revoke_parser = subparsers.add_parser(
+        "revoke-key",
+        help="Revoke a user keystore"
+    )
+
+    revoke_parser.add_argument(
+        "--user",
+        required=True
+    )
+
+    # Backup
+    backup_parser = subparsers.add_parser(
+        "backup-user",
+        help="Backup user keystore"
+    )
+
+    backup_parser.add_argument(
+        "--user",
+        required=True
+    )
+
+    backup_parser.add_argument(
+        "--output",
+        required=True
+    )
+
+    # Restore
+    restore_parser = subparsers.add_parser(
+        "restore-user",
+        help="Restore user keystore"
+    )
+
+    restore_parser.add_argument(
+        "--user",
+        required=True
+    )
+
+    restore_parser.add_argument(
+        "--input",
+        required=True
+    )
+
 
     #Encrypt
     encrypt_parser = subparsers.add_parser(

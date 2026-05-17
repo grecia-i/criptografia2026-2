@@ -6,7 +6,7 @@ from src.main import (
     main,
     create_user,
     decrypt_container,
-    load_private_key,
+    load_keystore,
     load_public_key,
     get_key_id
 )
@@ -58,8 +58,8 @@ def create_signed_container(tmp_path, users_path, vault_path, create_eve=False):
 def get_bob_decryption_data(users_path, tmp_path):
     bob_path = users_path / "Bob"
 
-    private_key = load_private_key(
-        bob_path / "private.pem",
+    private_key = load_keystore(
+        bob_path / "keystore.json",
         "examplepassword"
     )
 

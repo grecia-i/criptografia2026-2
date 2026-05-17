@@ -1,15 +1,23 @@
 import os
 import getpass
 import secrets
+from pathlib import Path
 from src.encryption.encrypt import encrypt_file
 from src.encryption.decrypt import decrypt_container
 from src.encryption.keys import (
     generate_key_pair,
-    store_private_key,
     store_public_key,
-    load_private_key,
     load_public_key,
     get_key_id
+)
+
+from src.encryption.keystore import (
+    create_keystore,
+    load_keystore,
+    revoke_keystore,
+    rotate_keys,
+    backup_keystore,
+    restore_keystore
 )
 from src.parser.parser import build_parser
 
@@ -26,12 +34,22 @@ def create_user(username):
     confirm = getpass.getpass("Confirm password: ")
 
     if password != confirm or not password:
+        (Path("users")/username).rmdir()
         raise ValueError("Invalid password")
 
     private_key, public_key = generate_key_pair()
-    store_private_key(private_key, os.path.join(user_dir, "private.pem"), password)
+
+    key_id = get_key_id(public_key)
+    create_keystore(
+        private_key,
+        password,
+        os.path.join(user_dir, "keystore.json"),
+        key_id
+    )
+
     store_public_key(public_key, os.path.join(user_dir, "public.pem"))
     print(f"User '{username}' created successfully")
+
 
 def validate_container(container_dir):
     if not os.path.isdir(container_dir):
@@ -68,7 +86,11 @@ def main():
             
             print(f"--- Authentication for Sender: {args.sender} ---")
             password_sender = getpass.getpass("Enter your password: ")
-            signer_key = load_private_key(os.path.join(sender_dir, "private.pem"), password_sender)
+
+            signer_key = load_keystore(
+                os.path.join(sender_dir, "keystore.json"),
+                password_sender
+            )
             
             sender_pub = load_public_key(os.path.join(sender_dir, "public.pem"))
             sender_id = get_key_id(sender_pub)
@@ -103,7 +125,11 @@ def main():
                 raise FileNotFoundError(f"User '{args.user}' not found")
             
             password = getpass.getpass(f"Password for {args.user}: ")
-            private_key = load_private_key(os.path.join(user_dir, "private.pem"), password)
+
+            private_key = load_keystore(
+                os.path.join(user_dir, "keystore.json"),
+                password
+            )
             
             public_key = load_public_key(os.path.join(user_dir, "public.pem"))
             my_id = get_key_id(public_key)
@@ -111,6 +137,56 @@ def main():
             decrypt_container(args.container_dir, args.output_file, private_key, my_id, USERS_PATH)
             print(f"Success: File saved to {args.output_file}")
 
+        elif args.command == "rotate-key":
+            user_dir = os.path.join(USERS_PATH, args.user)
+
+            if not os.path.isdir(user_dir):
+                raise FileNotFoundError("User not found")
+
+            password = getpass.getpass("Password: ")
+
+            new_key_id = rotate_keys(
+                user_dir,
+                password,
+                generate_key_pair,
+                store_public_key,
+                get_key_id
+            )
+
+            print(f"Keys rotated successfully")
+            print(f"New key ID: {new_key_id}")
+
+        elif args.command == "revoke-key":
+
+            user_dir = os.path.join(USERS_PATH, args.user)
+
+            revoke_keystore(
+                os.path.join(user_dir, "keystore.json")
+            )
+
+            print("Key revoked")
+
+        elif args.command == "backup-user":
+
+            user_dir = os.path.join(USERS_PATH, args.user)
+
+            backup_keystore(
+                user_dir,
+                args.output
+            )
+
+            print("Backup completed")
+
+        elif args.command == "restore-user":
+
+            user_dir = os.path.join(USERS_PATH, args.user)
+
+            restore_keystore(
+                args.input,
+                user_dir
+            )
+
+            print("Restore completed")
     except Exception as e:
         print(f"ERROR: {e}")
         raise e
