@@ -49,19 +49,21 @@ Además del cifrado y descifrado, las llaves también se utilizan para la genera
 
 ### Key rotation (conceptual or minimal implementation)
 
-La rotación de llaves permite reemplazar el par de llaves criptográficas de un usuario por uno nuevo. En nuestro sistema existe una implementación mínima mediante el comando rotate-key, el cual genera un nuevo par de llaves RSA para el usuario seleccionado.
+La rotación de llaves permite reemplazar el par de llaves criptográficas de un usuario por uno nuevo. En nuestro sistema existe una implementación mínima mediante el comando rotate-key, el cual marca la llave anterior como retirada, realiza un respaldo y genera un nuevo par de llaves RSA para el usuario seleccionado.
+
+Cuando el sistema detecta que una llave se ha usado por mas de dos años se envía un mensaje solicitando al usuario que actualice sus llaves.
 
 Durante este proceso, el sistema solicita la contraseña del usuario, genera una nueva llave privada y una nueva llave pública, calcula un nuevo identificador de llave pública y actualiza los archivos del usuario. La nueva llave privada se vuelve a proteger dentro del keystore.json, cifrada con AES-GCM mediante una clave derivada de la contraseña del usuario con Argon2id. La nueva llave pública se almacena nuevamente en public.pem.
 
-Esta rotación sería útil cuando se desea renovar periódicamente las llaves o cuando se sospecha que la llave anterior pudo haber sido expuesta. Actualmente, tenemos la limitante de cuando el sistema rota las llaves, las anteriores se reemplazan directamente y no se guardan automáticamente. Esto significa que los archivos cifrados con la llave antigua podrían necesitar volver a cifrarse con la nueva llave pública o mantener temporalmente la llave anterior para seguir pudiendo acceder a ellos.
+Esta rotación sería útil cuando se desea renovar periódicamente las llaves o cuando se sospecha que la llave anterior pudo haber sido expuesta.
 
 ### Key compromise response
 
-En caso de sospecha o confirmación de compromiso de una llave, el sistema considera que la llave privada del usuario ya no es confiable y debe ser reemplazada. Esto podría ocurrir si un atacante obtiene acceso al dispositivo del usuario, roba la contraseña o logra acceder al keystore.json junto con las credenciales necesarias para descifrarlo.
+En caso de sospecha o confirmación de compromiso de una llave, el sistema considera que la llave privada del usuario ya no es confiable y debe ser reemplazada. Esto podría ocurrir si un atacante obtiene acceso al dispositivo del usuario, roba la contraseña o logra acceder al keystore.json junto con las credenciales necesarias para descifrarlo, en esta situación el usuario debe revocar la llave mediante el comando revoke-key.
 
 La respuesta principal del sistema ante este escenario es realizar una rotación de llaves. Después de la rotación, los nuevos archivos cifrados utilizarían la nueva llave pública del usuario. Sin embargo, los archivos protegidos con la llave anterior podrían requerir recifrado o conservación temporal de la llave antigua hasta completar la migración.
 
-Por lo que por el momento nuestro sistema detectar el incidente, generar nuevas llaves, reemplazar las llaves comprometidas y utilizar las nuevas credenciales para futuros procesos de cifrado y autenticación.
+Por el momento en nuestro sistema detectar el incidente, generar nuevas llaves, reemplazar las llaves comprometidas y utilizar las nuevas credenciales para futuros procesos de cifrado y autenticación debe ser realizado por el usuario.
 
 ## Key Management Design
 

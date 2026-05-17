@@ -147,6 +147,9 @@ def retire_keystore(keystore_path: str):
     with open(keystore_path, "r") as f:
         keystore = json.load(f)
 
+    if keystore.get("status") == "revoked":
+        return
+    
     keystore["status"] = "retired"
     keystore["retired_at"] = datetime.utcnow().isoformat()
 
