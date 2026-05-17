@@ -62,7 +62,7 @@ def test_correct_password_dec(mock_env):
             with patch("src.main.build_parser") as mock_p:
                 mock_p.return_value.parse_args.return_value = decrypt_alice
                 main()
-    assert "Decryption failed: container may have been tampered with" in str(password.value)
+    assert "Decryption failed: container may have been tampered with" in str(password.value) # nosec
 
 def test_keystore_tampering(mock_env):
     tmp_path, users_path, vault_path = mock_env
