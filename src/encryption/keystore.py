@@ -1,6 +1,7 @@
 import json
 import os
 import secrets
+import getpass
 from datetime import datetime
 
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
@@ -38,7 +39,7 @@ def aad_keystore(keystore):
     aad = {}
     # to maintain integrity in the aad for the keystore
     for key in sorted(keystore):
-        if key != "encrypted_key" and key != "status":
+        if key != "encrypted_key" and key != "status" and key != "retired_at":
             aad[key] = keystore[key]
     
     return json.dumps(aad, sort_keys=True, separators=(',', ':')).encode(encoding='UTF-8')
@@ -85,7 +86,7 @@ def create_keystore(private_key, password: str, keystore_path: str, key_id: str)
     keystore["encrypted_key"] = ciphertext.hex()
 
     with open(keystore_path, "w") as f:
-        json.dump(keystore, f, separators=(',', ':'),indent=None)
+        json.dump(keystore, f, separators=(',', ':'),indent=4)
 
 
 def load_keystore(keystore_path: str, password: str):
@@ -100,14 +101,12 @@ def load_keystore(keystore_path: str, password: str):
     created_date = created_date = datetime.fromisoformat(created_at)
     now  = datetime.utcnow()
     exp_date = created_date.replace(year  = created_date.year + 2)
-    if(exp_date >= now):
+    if(now >= exp_date):
         print('\x1b[0;30;41m' + 'Your key has expired, renew it using: rotate-key <user>' + '\x1b[0m')
         print('\x1b[0;30;41m' + 'Keys can be backed up using: backup-user <user>' + '\x1b[0m')
         print(exp_date)
     else:
         print(exp_date)
-
-    
 
     salt = bytes.fromhex(keystore["salt"])
     nonce = bytes.fromhex(keystore["nonce"])
@@ -141,19 +140,51 @@ def revoke_keystore(keystore_path: str):
     keystore["revoked_at"] = datetime.utcnow().isoformat()
 
     with open(keystore_path, "w") as f:
-        json.dump(keystore, f, indent=4)
+        json.dump(keystore, f, separators=(',', ':'),indent=4)
+
+def retire_keystore(keystore_path: str):
+
+    with open(keystore_path, "r") as f:
+        keystore = json.load(f)
+
+    keystore["status"] = "retired"
+    keystore["retired_at"] = datetime.utcnow().isoformat()
+
+    with open(keystore_path, "w") as f:
+        json.dump(keystore, f, separators=(',', ':'),indent=4)
 
 
-def rotate_keys(user_dir: str, password: str, generate_key_pair, store_public_key, get_key_id):
+def rotate_keys( user_dir: str, old_password: str,
+                generate_key_pair,store_public_key, get_key_id):
+    
+    keystore_path = os.path.join(user_dir, "keystore.json")
+
+    try:
+        old_private_key = load_keystore(keystore_path, old_password)
+    except Exception as e:
+        raise ValueError("Current password is incorrect") from e
+    
+    retire_keystore(keystore_path)
+
+    backup_dir = os.path.join(
+        user_dir,
+        "archive","bk_" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    )
+    backup_keystore(user_dir, backup_dir)
 
     private_key, public_key = generate_key_pair()
 
     key_id = get_key_id(public_key)
 
+    new_password = getpass.getpass("Set password: ")
+    new_confirm = getpass.getpass("Confirm password: ")
+    if new_password != new_confirm or not new_password:
+        raise ValueError("Invalid password")
+
     create_keystore(
         private_key,
-        password,
-        os.path.join(user_dir, "keystore.json"),
+        new_password,
+        keystore_path,
         key_id
     )
 
