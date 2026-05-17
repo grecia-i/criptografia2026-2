@@ -37,7 +37,7 @@ El reporte de este modulo está disponible en:
 
 ## Administración de llaves ( D5 )
 
-Para esta entrega se implemento un ciclo de vida para las llaves asimetricas utilizadas para compartir archivos, en conjunto a esto se implemento una serie de mecanismos para administrar de manera segura la generacion y almacenamiento de las llaves privadas en un contenedor seguro mediante el uso de una funcion de derivacion de llave (KDF).
+Para esta entrega se implemento un ciclo de vida para las llaves asimétricas utilizadas para compartir archivos, en conjunto a esto se implemento una serie de mecanismos para administrar de manera segura la generación y almacenamiento de las llaves privadas en un contenedor seguro mediante el uso de una función de derivación de llave (KDF).
 
 El reporte de este modulo está disponible en:
 
@@ -67,7 +67,7 @@ Ruta objetivo es el archivo a descifrar, ejemplo ``"\vault_container\test.txt"``
 
 Ruta destino es la ruta donde se creara el archivo descifrado
 
-### Administracion de laves
+### Administración de laves
 
 - Rotación de llaves
 
