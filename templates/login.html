@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVault — Autenticación</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #391170, #14073c 60%, #09021f 100%);
+            --c-purple-dark: #230654;
+            --c-purple-bright: #510c9c;
+            --c-text-main: #2d3748;
+            --c-text-muted: #718096;
+            --c-border: #e2e8f0;
+            --c-input-bg: #f8fafc;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        /* Tarjeta Contenedora Principal */
+        .auth-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Cabecera Morada Integrada con Logotipo */
+        .auth-header {
+            background: linear-gradient(135deg, #1f0847 0%, #3b0a70 100%);
+            padding: 2.5rem 2rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .auth-logo-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 0.75rem auto;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+        }
+
+        .auth-logo-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .auth-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-subtitle {
+            font-size: 0.8rem;
+            color: #b099d9;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
+        /* Selector de Pestañas Estilizado */
+        .auth-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.15);
+            margin: 1.5rem 2rem 0 2rem;
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #a38ec4;
+            padding: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        /* Cuerpo del Formulario */
+        .auth-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--c-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            background: var(--c-input-bg);
+            border: 1px solid var(--c-border);
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            color: var(--c-text-main);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--c-purple-bright);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(81, 12, 156, 0.15);
+        }
+
+        /* Botón de Envío Principal con Icono */
+        .btn-submit {
+            width: 100%;
+            background: var(--c-purple-bright);
+            border: none;
+            padding: 0.9rem;
+            color: #ffffff;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 1.5rem;
+            transition: background 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: #420a80;
+        }
+
+        .btn-submit:disabled {
+            background: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .btn-submit svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        /* Medidor Interactiva de Contraseña */
+        .password-strength-wrapper {
+            margin-top: 0.5rem;
+        }
+
+        .strength-bar-container {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.3rem;
+        }
+
+        .strength-bar {
+            width: 0%;
+            height: 100%;
+            background: #ef4444;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .strength-bar.warning { background: #f59e0b; width: 50%; }
+        .strength-bar.success { background: #10b981; width: 100%; }
+
+        .strength-text {
+            font-size: 0.75rem;
+            color: var(--c-text-muted);
+            font-weight: 500;
+        }
+        
+        .strength-text.warning { color: #d97706; }
+        .strength-text.success { color: #059669; }
+
+        /* Banner de Credenciales Demo Inferior */
+        .demo-banner {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 0.85rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #065f46;
+            line-height: 1.4;
+        }
+
+        .demo-banner strong {
+            color: #047857;
+        }
+
+        /* Enlace Alternativo de Pie */
+        .auth-footer-link {
+            text-align: center;
+            margin-top: 1.25rem;
+            font-size: 0.85rem;
+            color: var(--c-text-muted);
+        }
+
+        .auth-footer-link a {
+            color: var(--c-purple-bright);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* Regla de Ocultamiento Limpio */
+        .hidden-form {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <div class="auth-title">SecureVault</div>
+            <div class="auth-subtitle">Cifrado Digital</div>
+            
+            <div class="auth-tabs">
+                <button class="tab-btn active" id="tab-login" onclick="switchAuth('login')">Iniciar sesión</button>
+                <button class="tab-btn" id="tab-register" onclick="switchAuth('register')">Crear cuenta</button>
+            </div>
+        </div>
+
+        <div class="auth-body">
+            <form id="login-form" onsubmit="handleAuth(event)">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="login-user" placeholder="tu_usuario" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="login-pass" placeholder="••••••••••••" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    Iniciar sesión
+                </button>
+            </form>
+
+            <form id="register-form" onsubmit="handleRegister(event)" class="hidden-form">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="reg-name" placeholder="ej: Alicia Smith" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre de Usuario</label>
+                    <input type="text" id="reg-user" placeholder="ej: bob" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="reg-pass" placeholder="Configura tu contraseña segura" required autocomplete="new-password" oninput="validatePassword(this.value)">
+                    
+                    <div class="password-strength-wrapper">
+                        <div class="strength-bar-container">
+                            <div id="strength-meter" class="strength-bar"></div>
+                        </div>
+                        <span id="strength-label" class="strength-text">Mínimo 8 caracteres y un símbolo.</span>
+                    </div>
+                </div>
+                
+                <button type="submit" id="reg-submit-btn" class="btn-submit" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M20 8v6"></path><path d="M23 11h-6"></path></svg>
+                    Generar Cuenta
+                </button>
+            </form>
+
+            <div class="auth-footer-link">
+                <span id="footer-text">¿No tienes cuenta?</span> 
+                <a href="#" id="footer-action-link" onclick="toggleFooterLink(event)">Regístrate aquí</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchAuth(type) {
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const fText = document.getElementById('footer-text');
+            const fLink = document.getElementById('footer-action-link');
+            
+            if(type === 'login') {
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                loginForm.classList.remove('hidden-form');
+                regForm.classList.add('hidden-form');
+                fText.innerText = "¿No tienes cuenta?";
+                fLink.innerText = "Regístrate aquí";
+            } else {
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+                loginForm.classList.add('hidden-form');
+                regForm.classList.remove('hidden-form');
+                fText.innerText = "¿Ya tienes cuenta?";
+                fLink.innerText = "Inicia sesión aquí";
+            }
+        }
+
+        function toggleFooterLink(e) {
+            e.preventDefault();
+            const isLoginActive = document.getElementById('tab-login').classList.contains('active');
+            switchAuth(isLoginActive ? 'register' : 'login');
+        }
+
+        function validatePassword(password) {
+            const meter = document.getElementById('strength-meter');
+            const label = document.getElementById('strength-label');
+            const submitBtn = document.getElementById('reg-submit-btn');
+            
+            let hasMinLength = password.length >= 8;
+            let hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_+\-=\[\]\\\/]/.test(password);
+
+            // Reseteo completo de clases semánticas CSS para evitar conflictos visuales
+            meter.className = "strength-bar";
+            label.className = "strength-text";
+
+            if (password.length === 0) {
+                label.innerText = 'Mínimo 8 caracteres y un símbolo.';
+                submitBtn.disabled = true;
+            } else if (hasMinLength && hasSpecialChar) {
+                meter.classList.add('success');
+                label.classList.add('success');
+                label.innerText = 'Seguridad adecuada cumplida.';
+                submitBtn.disabled = false;
+            } else {
+                meter.classList.add('warning');
+                label.classList.add('warning');
+                submitBtn.disabled = true;
+                
+                if (!hasMinLength) {
+                    label.innerText = 'Faltan caracteres (Mín. 8).';
+                } else if (!hasSpecialChar) {
+                    label.innerText = 'Falta un carácter especial o símbolo.';
+                }
+            }
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: document.getElementById('reg-name').value.trim(),
+                    username: document.getElementById('reg-user').value.trim(),
+                    password: document.getElementById('reg-pass').value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert("Registro realizado con éxito."); 
+                    document.getElementById('register-form').reset();
+                    validatePassword('');
+                    switchAuth('login');
+                } else { 
+                    alert(data.message); 
+                }
+            });
+        }
+
+        function handleAuth(event) {
+            event.preventDefault();
+            const user = document.getElementById('login-user').value.trim();
+            fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    username: user, 
+                    password: document.getElementById('login-pass').value 
+                })
+            })
+            .then(res => {
+                if (!res.ok) return res.json().then(data => { throw new Error(data.message) });
+                return res.json();
+            })
+            .then(data => {
+                sessionStorage.setItem('current_user', data.user.username);
+                sessionStorage.setItem('current_user_name', data.user.nombre);
+                window.location.href = '/dashboard';
+            })
+            .catch(err => alert(err.message));
+        }
+    </script>
+</body>
+</html>
