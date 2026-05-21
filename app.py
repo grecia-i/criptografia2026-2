@@ -72,15 +72,15 @@ def encrypt():
     zip_path = f"{vault_dir}.zip"
 
     try:
-        priv, _ = load_keystore(os.path.join(USERS_PATH, sender, "keystore.json"), passphrase)
+        priv = load_keystore(os.path.join(USERS_PATH, sender, "keystore.json"), passphrase)
         pub = load_public_key(os.path.join(USERS_PATH, recipient, "public.pem"))
         
         encrypt_file(
-            temp_path, 
-            [{"user": recipient, "id": get_key_id(pub), "key": pub}], 
-            priv, 
-            get_key_id(load_public_key(os.path.join(USERS_PATH, sender, "public.pem"))), 
-            vault_dir
+            temp_path,
+            vault_dir,
+            [{"user": recipient, "id": get_key_id(pub), "key": pub}],
+            priv,
+            get_key_id(load_public_key(os.path.join(USERS_PATH, sender, "public.pem")))
         )
         
         shutil.make_archive(vault_dir, 'zip', vault_dir)
@@ -104,10 +104,12 @@ def decrypt():
     
     out_path = os.path.join(VAULT_PATH, f"out_{uid}")
     try:
-        priv, _ = load_keystore(os.path.join(USERS_PATH, username, "keystore.json"), passphrase)
-        decrypt_container(extract_dir, out_path, priv, username, USERS_PATH)
+        priv = load_keystore(os.path.join(USERS_PATH, username, "keystore.json"), passphrase)
+        user_pub = load_public_key(os.path.join(USERS_PATH, username, "public.pem"))
+        my_id = get_key_id(user_pub)
+        decrypt_container(extract_dir, out_path, priv, my_id, USERS_PATH)
         return send_file(out_path, as_attachment=True)
-    except:
+    except Exception:
         return jsonify({"status": "error", "message": "No se pudo descifrar. Verifique su clave."}), 401
 
 @app.route('/api/archivos', methods=['GET'])

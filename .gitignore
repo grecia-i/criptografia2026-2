@@ -8,3 +8,5 @@ vault_container/*
 *.pem
 .vscode
 /users/*
+env/
+*.zip
