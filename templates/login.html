@@ -311,7 +311,7 @@
                         <div class="strength-bar-container">
                             <div id="strength-meter" class="strength-bar"></div>
                         </div>
-                        <span id="strength-label" class="strength-text">Mínimo 8 caracteres y un símbolo.</span>
+                        <span id="strength-label" class="strength-text">Mínimo 8 caracteres, una: minúscula, mayúscula, y un: dígito y símbolo.</span>
                     </div>
                 </div>
                 
@@ -367,15 +367,18 @@
             
             let hasMinLength = password.length >= 8;
             let hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_+\-=\[\]\\\/]/.test(password);
+            let hasLowcase = /[a-z]/.test(password);
+            let hasUppcase = /[A-Z]/.test(password);
+            let hasDigit = /[0-9]/.test(password);
 
             // Reseteo completo de clases semánticas CSS para evitar conflictos visuales
             meter.className = "strength-bar";
             label.className = "strength-text";
 
             if (password.length === 0) {
-                label.innerText = 'Mínimo 8 caracteres y un símbolo.';
+                label.innerText = 'Mínimo 8 caracteres, una: minúscula, mayúscula, y un: dígito y símbolo.';
                 submitBtn.disabled = true;
-            } else if (hasMinLength && hasSpecialChar) {
+            } else if (hasMinLength && hasSpecialChar && hasLowcase && hasUppcase && hasDigit) {
                 meter.classList.add('success');
                 label.classList.add('success');
                 label.innerText = 'Seguridad adecuada cumplida.';
@@ -387,6 +390,12 @@
                 
                 if (!hasMinLength) {
                     label.innerText = 'Faltan caracteres (Mín. 8).';
+                } else if (!hasLowcase) {
+                    label.innerText = 'Falta una letra minúscula.'
+                } else if (!hasUppcase) {
+                    label.innerText = 'Falta una letra mayúscula.'
+                } else if (!hasDigit) {
+                    label.innerText = 'Falta un dígito.'
                 } else if (!hasSpecialChar) {
                     label.innerText = 'Falta un carácter especial o símbolo.';
                 }

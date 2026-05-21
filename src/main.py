@@ -23,6 +23,29 @@ from src.parser.parser import build_parser
 
 VAULT_PATH = "vault_container"
 USERS_PATH = "users"
+SPECIAL_CHARS = set("!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?`~")
+
+def password_policy(password, username):
+    if not password or len(password) < 8:
+        (Path("users")/username).rmdir()
+        raise ValueError("Password must be at least 8 characters long")
+    if password.isspace():
+        (Path("users")/username).rmdir()
+        raise ValueError("Invalid password")
+    
+    score = 0
+    if any(c.isupper() for c in password):
+        score += 1
+    if any(c.islower() for c in password):
+        score += 1
+    if any(c.isdigit() for c in password):
+        score += 1
+    if any(c in SPECIAL_CHARS for c in password):
+        score += 1
+    #missing to check if its a common password in databases, could use a library
+    if score < 4:
+        (Path("users")/username).rmdir()
+        raise ValueError("Invalid password. It must contain at least one: lowercase, uppercase, digit and symbol")
 
 def create_user(username):
     user_dir = os.path.join(USERS_PATH, username)
@@ -33,9 +56,15 @@ def create_user(username):
     password = getpass.getpass("Set password: ")
     confirm = getpass.getpass("Confirm password: ")
 
-    if password != confirm or not password:
+    if not password:
         (Path("users")/username).rmdir()
-        raise ValueError("Invalid password")
+        raise ValueError("Invalid password.")
+    
+    password_policy(password, username)
+    
+    if password != confirm:
+        (Path("users")/username).rmdir()
+        raise ValueError("Passwords do not match")
 
     private_key, public_key = generate_key_pair()
 
