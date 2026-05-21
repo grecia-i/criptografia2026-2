@@ -37,7 +37,7 @@ def register():
     
     os.makedirs(user_dir)
     with open(os.path.join(user_dir, "profile.json"), "w") as f:
-        json.dump({"nombre": data.get('nombre')}, f)
+        json.dump({"nombre": data.get('nombre')}, f, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
     
     priv, pub = generate_key_pair()
     create_keystore(priv, data['password'], os.path.join(user_dir, "keystore.json"), get_key_id(pub))
