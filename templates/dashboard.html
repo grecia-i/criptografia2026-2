@@ -598,6 +598,12 @@
                     <button class="btn-primary" onclick="rotateUserKeys()" style="background: #ef4444; border:none;">
                         Rotar Par de Llaves
                     </button>
+                    <button class="btn-primary" onclick="backupUser()" style="margin-top: 1rem;">
+                        Crear Backup de Usuario
+                    </button>
+                    <button id="restore-backup-btn" class="btn-primary" onclick="restoreUser()" style="display:none; margin-top: 1rem; background: #f59e0b;">
+                        Restaurar Backup
+                    </button>
                 </div>
 
                 <h3 style="margin: 2.5rem 0 1rem 0; font-family: 'Syne', sans-serif;">Estado de claves correspondientes</h3>
@@ -665,6 +671,7 @@
             loadUsuarios();
             loadArchivos();
             loadKeysStatus();
+            checkBackupStatus();
         }
 
         async function loadUsuarios() {
@@ -809,9 +816,45 @@
             window.location.href = `/api/download_zip/${containerName}`;
         }
 
+        function backupUser() {
+            fetch('/api/backup-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: usuarioActivo })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(() => alert("Error al crear backup."));
+        }
+
+        function restoreUser() {
+            fetch('/api/restore-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: usuarioActivo })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                loadDashboardData();
+            })
+            .catch(() => alert("Error al restaurar backup."));
+        }
         function handleLogout() {
             sessionStorage.clear();
             window.location.href = '/login';
+        }
+        function checkBackupStatus() {
+            fetch(`/api/backup-status?user=${usuarioActivo}`)
+                .then(res => res.json())
+                .then(data => {
+                    const btn = document.getElementById('restore-backup-btn');
+                    if (btn) {
+                        btn.style.display = data.available ? 'block' : 'none';
+                    }
+                });
         }
     </script>
 </body>

@@ -2,6 +2,7 @@ import os
 import json
 import secrets
 import shutil
+from src.encryption.keystore import create_keystore, load_keystore, backup_keystore, restore_keystore
 from flask import Flask, render_template, jsonify, request, send_file
 from datetime import datetime, timezone
 from src.encryption.keys import generate_key_pair, store_public_key, load_public_key, get_key_id
@@ -205,6 +206,65 @@ def rotate_keys():
         return jsonify({"status": "success", "message": "Llaves rotadas correctamente. Seguridad renovada."})
     except Exception as e:
         return jsonify({"status": "error", "message": "No se pudo rotar: verifica tu contraseña."}), 401
+
+@app.route('/api/backup-user', methods=['POST'])
+def backup_user_web():
+    data = request.get_json()
+    username = data.get('username', '').lower().strip()
+
+    user_dir = os.path.join(USERS_PATH, username)
+    backup_dir = os.path.join("backup", username)
+
+    try:
+        if not os.path.isdir(user_dir):
+            return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+
+        backup_keystore(user_dir, backup_dir)
+
+        return jsonify({
+            "status": "success",
+            "message": f"Backup creado correctamente en: {backup_dir}"
+        })
+    except Exception:
+        return jsonify({
+            "status": "error",
+            "message": "No se pudo crear el backup"
+        }), 500
+    
+@app.route('/api/restore-user', methods=['POST'])
+def restore_user_web():
+    data = request.get_json()
+    username = data.get('username', '').lower().strip()
+
+    user_dir = os.path.join(USERS_PATH, username)
+    backup_dir = os.path.join("backup", username)
+
+    try:
+        if not os.path.isdir(backup_dir):
+            return jsonify({
+                "status": "error",
+                "message": "No existe backup para este usuario"
+            }), 404
+
+        restore_keystore(backup_dir, user_dir)
+
+        return jsonify({
+            "status": "success",
+            "message": "Restore completado correctamente para tu usuario"
+        })
+    except Exception:
+        return jsonify({
+            "status": "error",
+            "message": "No se pudo restaurar el usuario"
+        }), 500
+@app.route('/api/backup-status', methods=['GET'])
+def backup_status():
+    username = request.args.get('user', '').lower().strip()
+    backup_dir = os.path.join("backup", username)
+
+    return jsonify({
+        "available": os.path.isdir(backup_dir)
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
