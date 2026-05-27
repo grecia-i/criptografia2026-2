@@ -85,7 +85,7 @@ def create_keystore(private_key, password: str, keystore_path: str, key_id: str)
 
     keystore["encrypted_key"] = ciphertext.hex()
 
-    with open(keystore_path, "w") as f:
+    with open(keystore_path, "w", encoding="utf-8" ) as f:
         json.dump(keystore, f, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
 
 
@@ -139,7 +139,7 @@ def revoke_keystore(keystore_path: str):
     keystore["status"] = "revoked"
     keystore["revoked_at"] = datetime.now(timezone.utc).isoformat()
 
-    with open(keystore_path, "w") as f:
+    with open(keystore_path, "w", encoding="utf-8" ) as f:
         json.dump(keystore, f, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
 
 def retire_keystore(keystore_path: str):
@@ -153,7 +153,7 @@ def retire_keystore(keystore_path: str):
     keystore["status"] = "retired"
     keystore["retired_at"] = datetime.now(timezone.utc).isoformat()
 
-    with open(keystore_path, "w") as f:
+    with open(keystore_path, "w", encoding="utf-8" ) as f:
         json.dump(keystore, f, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
 
 
@@ -203,7 +203,7 @@ def backup_keystore(user_dir: str, backup_dir: str):
 
     os.makedirs(backup_dir, exist_ok=True)
 
-    files = ["keystore.json", "public.pem"]
+    files = ["keystore.json", "profile.json", "public.pem"]
 
     for file_name in files:
         src = os.path.join(user_dir, file_name)

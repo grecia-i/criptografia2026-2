@@ -10,3 +10,4 @@ vault_container/*
 /users/*
 env/
 *.zip
+backup/*
