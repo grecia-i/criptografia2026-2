@@ -234,7 +234,7 @@
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.0rem;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
@@ -293,6 +293,7 @@
             cursor: pointer;
             transition: transform 0.2s, opacity 0.2s;
             box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+            margin-bottom: 0.5rem;
         }
 
         .btn-primary:hover {
@@ -385,6 +386,32 @@
             background: var(--c-purple-bright);
             border-color: var(--c-purple-bright);
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .selected-recipient-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .recipient-bubble {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 0.70rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        .recipient-bubble button {
+            border: none;
+            background: transparent;
+            color: #f87171;
+            cursor: pointer;
+            font-size: 0.8rem;
         }
 
         @keyframes fadeIn {
@@ -505,10 +532,12 @@
                         </div>
                         <div class="form-group">
                             <label>Destinatario autorizado</label>
-                            <select id="enc-recipient" required>
-                                <option value="">Selecciona destinatario...</option>
-                            </select>
+                            <select id="enc-recipient" name="recipient"></select>
+                            <div class="selected-recipient-list" id="selected-recipients"></div>
                         </div>
+                        <button type="button" class="btn-primary" onclick="addRecipient()" style="background-color: indigo; border: none; padding: 0.75rem; margin-bottom: 0.4rem;">
+                            Agregar destinatario
+                        </button>
                         <div class="form-group">
                             <label>Contraseña de firma</label>
                             <input type="password" id="enc-pass" placeholder="Contraseña de firma" required>
@@ -631,6 +660,7 @@
     <script>
         const usuarioActivo     = sessionStorage.getItem('current_user');
         const nombreUsuarioActivo = sessionStorage.getItem('current_user_name');
+        let selectedRecipients = [];
 
         if (!usuarioActivo) { window.location.href = '/login'; }
 
@@ -706,6 +736,40 @@
             }
         }
 
+        function renderSelectedRecipients() {
+            const container = document.getElementById('selected-recipients');
+            container.innerHTML = '';
+            selectedRecipients.forEach(username => {
+                const chip = document.createElement('div');
+                chip.className = 'recipient-bubble';
+                chip.innerHTML = `
+                    <span>${username}</span>
+                    <button type="button" onclick="removeRecipient('${username}')">×</button>`;
+                container.appendChild(chip);
+            });
+        }
+
+        function addRecipient() {
+            const select = document.getElementById('enc-recipient');
+            const value = select.value;
+            if (!value) {
+                alert('Selecciona un destinatario antes de agregar.');
+                return;
+            }
+            if (selectedRecipients.includes(value)) {
+                alert('Este destinatario ya fue agregado.');
+                return;
+            }
+            selectedRecipients.push(value);
+            renderSelectedRecipients();
+            select.value = '';
+        }
+
+        function removeRecipient(username) {
+            selectedRecipients = selectedRecipients.filter(u => u !== username);
+            renderSelectedRecipients();
+        }
+
         function loadArchivos() {
             fetch(`/api/archivos?user=${usuarioActivo}`)
                 .then(res => res.json())
@@ -764,12 +828,12 @@
         function handleEncrypt(event) {
             event.preventDefault();
             const fileInput  = document.getElementById('enc-file').files[0];
-            const recipient  = document.getElementById('enc-recipient').value;
             const passphrase = document.getElementById('enc-pass').value;
 
             const formData = new FormData();
             formData.append('file',       fileInput);
-            formData.append('recipient',  recipient);
+            //formData.append('recipient',  recipient);
+            selectedRecipients.forEach(r => formData.append('recipient', r));
             formData.append('passphrase', passphrase);
             formData.append('sender',     usuarioActivo);
 
