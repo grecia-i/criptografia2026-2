@@ -59,10 +59,12 @@ def auth():
 def encrypt():
     file = request.files.get('file')
     sender = request.form.get('sender', '').lower().strip()
-    recipient = request.form.get('recipient', '').lower().strip()
+    #recipient = request.form.get('recipient', '').lower().strip()
+    recipients = request.form.getlist('recipient')
+    recipients = [r.lower().strip() for r in recipients if r and r.strip()]
     passphrase = request.form.get('passphrase')
 
-    if not all([file, sender, recipient, passphrase]):
+    if not all([file, sender, recipients, passphrase]):
         return jsonify({"status": "error", "message": "Datos incompletos"}), 400
 
     uid       = secrets.token_hex(4)
@@ -73,10 +75,25 @@ def encrypt():
 
     try:
         priv = load_keystore(os.path.join(USERS_PATH, sender, "keystore.json"), passphrase)
+<<<<<<< HEAD
         pub  = load_public_key(os.path.join(USERS_PATH, recipient, "public.pem"))
         encrypt_file(
             temp_path, vault_dir,
             [{"user": recipient, "id": get_key_id(pub), "key": pub}],
+=======
+        recipientPub = []
+        for r in recipients:
+            PUB_PATH = os.path.join(USERS_PATH, r, "public.pem")
+            if not os.path.exists(PUB_PATH):
+                return jsonify({"status": "error", "message": f"Destinatario {r} no encontrado"}), 404
+            pub = load_public_key(PUB_PATH)
+            recipientPub.append({"user": r, "id": get_key_id(pub), "key": pub})
+
+        encrypt_file(
+            temp_path,
+            vault_dir,
+            recipientPub,
+>>>>>>> 34e7e9d9ac48bb7f22f8bef0414652e390a97944
             priv,
             get_key_id(load_public_key(os.path.join(USERS_PATH, sender, "public.pem")))
         )
