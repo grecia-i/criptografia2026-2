@@ -813,6 +813,7 @@
                 .catch(err => alert(err.message));
         }
         function descargarZipBuzon(containerName) {
+            console.log("Descargando:", containerName); 
             window.location.href = `/api/download_zip/${containerName}`;
         }
 

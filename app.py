@@ -65,52 +65,73 @@ def encrypt():
     if not all([file, sender, recipient, passphrase]):
         return jsonify({"status": "error", "message": "Datos incompletos"}), 400
 
-    uid = secrets.token_hex(4)
+    uid       = secrets.token_hex(4)
     temp_path = os.path.join(VAULT_PATH, f"temp_{uid}_{file.filename}")
+    vault_dir = os.path.join(VAULT_PATH, f"{file.filename}_vault")
+    zip_path  = f"{vault_dir}.zip"
     file.save(temp_path)
-    
-    vault_dir = os.path.join(VAULT_PATH, f"{file.filename}_{uid}_vault")
-    zip_path = f"{vault_dir}.zip"
 
     try:
         priv = load_keystore(os.path.join(USERS_PATH, sender, "keystore.json"), passphrase)
-        pub = load_public_key(os.path.join(USERS_PATH, recipient, "public.pem"))
-        
+        pub  = load_public_key(os.path.join(USERS_PATH, recipient, "public.pem"))
         encrypt_file(
-            temp_path,
-            vault_dir,
+            temp_path, vault_dir,
             [{"user": recipient, "id": get_key_id(pub), "key": pub}],
             priv,
             get_key_id(load_public_key(os.path.join(USERS_PATH, sender, "public.pem")))
         )
-        
         shutil.make_archive(vault_dir, 'zip', vault_dir)
-        if os.path.exists(temp_path): os.remove(temp_path)
-        
-        return send_file(zip_path, as_attachment=True, download_name=f"{file.filename}.zip")
+        return send_file(zip_path, as_attachment=True, download_name=f"{file.filename}_vault.zip")
+
     except Exception:
+        # Si falló, limpia todo incluyendo vault_dir y zip
+        if os.path.exists(vault_dir): shutil.rmtree(vault_dir)
+        if os.path.exists(zip_path):  os.remove(zip_path)
         return jsonify({"status": "error", "message": "Error en la firma o cifrado. Verifique su contraseña."}), 401
+
+    finally:
+        # Solo borra el temp, vault_dir y zip deben quedar para el buzón
+        if os.path.exists(temp_path): os.remove(temp_path)
+
 
 @app.route('/api/decrypt', methods=['POST'])
 def decrypt():
+    from flask import after_this_request
+
     file = request.files.get('file')
     passphrase = request.form.get('passphrase')
     username = request.form.get('user', '').lower().strip()
-    
-    uid = secrets.token_hex(4)
-    zip_path = os.path.join(VAULT_PATH, f"in_{uid}.zip")
+
+    uid         = secrets.token_hex(4)
+    zip_path    = os.path.join(VAULT_PATH, f"in_{uid}.zip")
     extract_dir = os.path.join(VAULT_PATH, f"ex_{uid}")
+    out_path    = os.path.join(VAULT_PATH, f"out_{uid}")
+
     file.save(zip_path)
     shutil.unpack_archive(zip_path, extract_dir, 'zip')
-    
-    out_path = os.path.join(VAULT_PATH, f"out_{uid}")
+
     try:
-        priv = load_keystore(os.path.join(USERS_PATH, username, "keystore.json"), passphrase)
+        priv     = load_keystore(os.path.join(USERS_PATH, username, "keystore.json"), passphrase)
         user_pub = load_public_key(os.path.join(USERS_PATH, username, "public.pem"))
-        my_id = get_key_id(user_pub)
+        my_id    = get_key_id(user_pub)
         decrypt_container(extract_dir, out_path, priv, my_id, USERS_PATH)
+
+        @after_this_request
+        def cleanup(response):
+            try:
+                if os.path.exists(zip_path):    os.remove(zip_path)
+                if os.path.exists(extract_dir): shutil.rmtree(extract_dir)
+                if os.path.exists(out_path):    os.remove(out_path)
+            except Exception:
+                pass
+            return response
+
         return send_file(out_path, as_attachment=True)
+
     except Exception:
+        if os.path.exists(zip_path):    os.remove(zip_path)
+        if os.path.exists(extract_dir): shutil.rmtree(extract_dir)
+        if os.path.exists(out_path):    os.remove(out_path)
         return jsonify({"status": "error", "message": "No se pudo descifrar. Verifique su clave."}), 401
 
 @app.route('/api/archivos', methods=['GET'])
@@ -266,5 +287,22 @@ def backup_status():
         "available": os.path.isdir(backup_dir)
     })
 
+@app.route('/api/download_zip/<path:container_name>', methods=['GET'])
+def download_zip(container_name):
+    # Seguridad: evitar path traversal
+    if '..' in container_name or container_name.startswith('/'):
+        return jsonify({"status": "error", "message": "Nombre inválido"}), 400
+
+    zip_path = os.path.join(VAULT_PATH, f"{container_name}.zip")
+
+    # Si no existe el .zip, lo generamos desde la carpeta
+    if not os.path.exists(zip_path):
+        vault_dir = os.path.join(VAULT_PATH, container_name)
+        if not os.path.exists(vault_dir):
+            return jsonify({"status": "error", "message": "Archivo no encontrado"}), 404
+        shutil.make_archive(os.path.join(VAULT_PATH, container_name), 'zip', vault_dir)
+
+    return send_file(zip_path, as_attachment=True, download_name=f"{container_name}.zip")
 if __name__ == '__main__':
     app.run(debug=True)
+
