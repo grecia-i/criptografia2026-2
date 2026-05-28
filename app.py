@@ -75,12 +75,6 @@ def encrypt():
 
     try:
         priv = load_keystore(os.path.join(USERS_PATH, sender, "keystore.json"), passphrase)
-<<<<<<< HEAD
-        pub  = load_public_key(os.path.join(USERS_PATH, recipient, "public.pem"))
-        encrypt_file(
-            temp_path, vault_dir,
-            [{"user": recipient, "id": get_key_id(pub), "key": pub}],
-=======
         recipientPub = []
         for r in recipients:
             PUB_PATH = os.path.join(USERS_PATH, r, "public.pem")
@@ -93,7 +87,6 @@ def encrypt():
             temp_path,
             vault_dir,
             recipientPub,
->>>>>>> 34e7e9d9ac48bb7f22f8bef0414652e390a97944
             priv,
             get_key_id(load_public_key(os.path.join(USERS_PATH, sender, "public.pem")))
         )
