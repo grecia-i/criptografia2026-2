@@ -3,7 +3,7 @@ import json
 import secrets
 import shutil
 from src.encryption.keystore import create_keystore, load_keystore, backup_keystore, restore_keystore
-from flask import Flask, render_template, jsonify, request, send_file
+from flask import Flask, render_template, jsonify, request, send_file, after_this_request
 from datetime import datetime, timezone
 from src.encryption.keys import generate_key_pair, store_public_key, load_public_key, get_key_id
 from src.encryption.keystore import create_keystore, load_keystore
@@ -59,7 +59,6 @@ def auth():
 def encrypt():
     file = request.files.get('file')
     sender = request.form.get('sender', '').lower().strip()
-    #recipient = request.form.get('recipient', '').lower().strip()
     recipients = request.form.getlist('recipient')
     recipients = [r.lower().strip() for r in recipients if r and r.strip()]
     passphrase = request.form.get('passphrase')
@@ -91,18 +90,25 @@ def encrypt():
             get_key_id(load_public_key(os.path.join(USERS_PATH, sender, "public.pem")))
         )
         shutil.make_archive(vault_dir, 'zip', vault_dir)
+
+        @after_this_request
+        def cleanup(response):
+            try:
+                if os.path.exists(zip_path): os.remove(zip_path)
+            except Exception:
+                pass
+            return response
+
         return send_file(zip_path, as_attachment=True, download_name=f"{file.filename}_vault.zip")
 
-    except Exception:
-        # Si falló, limpia todo incluyendo vault_dir y zip
+    except Exception as e:
         if os.path.exists(vault_dir): shutil.rmtree(vault_dir)
         if os.path.exists(zip_path):  os.remove(zip_path)
-        return jsonify({"status": "error", "message": "Error en la firma o cifrado. Verifique su contraseña."}), 401
+        print(f"ERROR encrypt: {e}")
+        return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 401
 
     finally:
-        # Solo borra el temp, vault_dir y zip deben quedar para el buzón
         if os.path.exists(temp_path): os.remove(temp_path)
-
 
 @app.route('/api/decrypt', methods=['POST'])
 def decrypt():
@@ -299,18 +305,26 @@ def backup_status():
 
 @app.route('/api/download_zip/<path:container_name>', methods=['GET'])
 def download_zip(container_name):
-    # Seguridad: evitar path traversal
     if '..' in container_name or container_name.startswith('/'):
         return jsonify({"status": "error", "message": "Nombre inválido"}), 400
 
     zip_path = os.path.join(VAULT_PATH, f"{container_name}.zip")
+    generated = False
 
-    # Si no existe el .zip, lo generamos desde la carpeta
     if not os.path.exists(zip_path):
         vault_dir = os.path.join(VAULT_PATH, container_name)
         if not os.path.exists(vault_dir):
             return jsonify({"status": "error", "message": "Archivo no encontrado"}), 404
         shutil.make_archive(os.path.join(VAULT_PATH, container_name), 'zip', vault_dir)
+        generated = True
+
+    @after_this_request
+    def cleanup(response):
+        try:
+            if generated and os.path.exists(zip_path): os.remove(zip_path)
+        except Exception:
+            pass
+        return response
 
     return send_file(zip_path, as_attachment=True, download_name=f"{container_name}.zip")
 if __name__ == '__main__':
