@@ -17,6 +17,7 @@
             --c-purple-glow: #8b5cf6;
             --c-text-main: #f1f5f9;
             --c-text-muted: #94a3b8;
+            --c-text-message: #a794b8;
             
             --c-ok: #10b981;
             --c-active: #3b82f6;
@@ -214,6 +215,14 @@
             font-size: 0.85rem;
             font-weight: 700;
             color: var(--c-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .message-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--c-text-message);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -529,6 +538,7 @@
                         <div class="form-group">
                             <label>Archivo a proteger</label>
                             <input type="file" id="enc-file" required>
+                            <div class="message-label">Tamaño máximo de archivo: 20Mb</div>
                         </div>
                         <div class="form-group">
                             <label>Destinatario autorizado</label>
@@ -863,12 +873,17 @@
             fetch('/api/decrypt', { method: 'POST', body: formData })
                 .then(async res => {
                     if (!res.ok) { const err = await res.json(); throw new Error(err.message); }
-                    return res.blob();
+                    const blob = await res.blob();
+                    return {blob, disposition: res.headers.get('Content-Disposition')};
                 })
-                .then(blob => {
+                .then( ({blob, disposition})=> {
+                    let filename = 'download';
+                    const match = disposition?disposition.match(/filename="?([^"]+)"?/): null;
+                    if (match){ filename = match[1]; }
+
                     const url = window.URL.createObjectURL(blob);
                     const a   = document.createElement('a');
-                    a.href = url; a.download = '';
+                    a.href = url; a.download = filename;
                     document.body.appendChild(a); a.click();
                     document.body.removeChild(a); window.URL.revokeObjectURL(url);
                     document.getElementById('decrypt-form').reset();
