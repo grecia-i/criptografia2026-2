@@ -1,0 +1,5 @@
+# Threat model summary
+# Cryptographic design decisions
+• Canonicalization strategy
+• Key management strategy
+• Security audit findings
