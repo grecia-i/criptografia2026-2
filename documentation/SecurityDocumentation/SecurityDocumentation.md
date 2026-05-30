@@ -1,1 +1,18 @@
-# sECURITY 
+# Security Documentation
+
+Contribuyentes:
+
+- Castillo Soto Jacqueline,
+- Meneses Calderas Grecia Irais,
+- Pérez Osorio Luis Eduardo,
+- Rivas Gil María Lucía.
+
+## Threat model summary
+
+## Cryptographic design decisions
+
+## Canonicalization strategy
+
+## Key management strategy
+
+## Security audit findings
