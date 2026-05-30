@@ -1,4 +1,5 @@
 # Bóveda Digital
+![Versión](https://img.shields.io/badge/versión-2.1.3-green)
 
 Proyecto para la clase de Criptografía
 
@@ -10,6 +11,14 @@ Contribuyentes:
 - Meneses Calderas Grecia Irais,
 - Pérez Osorio Luis Eduardo,
 - Rivas Gil María Lucía.
+
+## Arquitectura y Modelo de Amenazas ( D1 )
+
+Primer acercamiento, descripción y planeación del sistema. Se define la arquitectura, los requerimientos de seguridad, el modelo STRIDE, las suposiciones de confianza, el análisis de superficie de ataque y las limitaciones de diseño.
+
+El desglose de todos los puntos está disponible en:
+
+[ArchitectureThreatModel](documentation/D1-ArchitectureAndThreatModel/ArchitectureAndThreatModel.md)
 
 ## Cifrado simétrico ( D2 )
 
@@ -43,9 +52,37 @@ El reporte de este modulo está disponible en:
 
 [Key Management](documentation/D6-KeyManagement/D6-KeyManagement.md)
 
-## Uso del programa
+# Uso del programa
 
-Los comandos se ejecutan desde el directorio raíz del proyecto
+Los comandos se ejecutan desde el directorio raíz del proyecto. 
+
+Existen dos formas de ejecutar el proyecto:
+- En [terminal](#terminal),
+- En [interfaz gráfica](#GUI).
+
+El sistema no está listo para producción.
+
+## GUI
+
+Para ejecutar la interfaz se debe crear un entorno virtual en el directorio raíz del proyecto.
+
+``python -m venv /path/envName``
+
+El entorno virtual se debe activar. Se recomienda consultar la [documentacion oficial](https://docs.python.org/3/library/venv.html) de python en la sección **'How venvs work'** para ejecutar el comando correcto de acuerdo al sistema operativo del usuario.
+
+Para lanzar el servidor de desarrollo, ejecutar:
+
+``python -m src.front.app``
+
+Al dirigirnos al host que Flask asigna a la aplicación, nos muestra la pantalla de inicio de sesión.
+
+![inicioSesion](documentation/D6-KeyManagement/loginpage.png)
+
+Para terminar la ejecución se presiona ``CTRL+C`` y para desactivar el entorno virtual se digita el comando:
+
+``deactivate``
+
+## Terminal
 
 ### Creación de usuarios
 

@@ -18,10 +18,10 @@ La bóveda incorporará mecanismos que permitan detectar la modificación de los
 
 ### ¿Qué está explícitamente fuera del alcance?
 El sistema se enfoca en la seguridad digital de los archivos y llaves privadas mediante mecanismos de cifrado y autentificación, como está planteado en este documento no puede proteger contra ataques de ingeniería social o descuidos del usuario con respecto a la privacidad de las credenciales con las que ingresará al sistema.
-El sistema busca garantizar la seguridad computacional de los archivos almacenados ante atacantes con capacidad de cómputo acotada, no entra en el alcance del proyecto implementar algoritmos post-cuánticos o considerando capacidades de cómputo infinitas, tampoco se garantiza la seguridad física de la información en caso de algún desastre natural, accidente o ataque malicioso
+El sistema busca garantizar la seguridad computacional de los archivos almacenados ante atacantes con capacidad de cómputo acotada, no entra en el alcance del proyecto implementar algoritmos post-cuánticos o considerando capacidades de cómputo infinitas, tampoco se garantiza la seguridad física de la información en caso de algún desastre natural, accidente o ataque malicioso.
 
 ## 2. Arquitectura del sistema
-![Modelo de Arquitectura](Arquitectura-D1.jpg)
+![Modelo de Arquitectura](Arquitectura-D1.jpeg)
 
 ## 3. Requerimientos de seguridad
 
@@ -40,7 +40,6 @@ En la parte de los respaldos, sucede lo mismo, pues así se asegura que en caso 
 ### Disponibilidad 
 Para que el sistema sea resiliente, se implementan los respaldos redundantes para la recuperación inmediata ante fallos críticos. Estos respaldos mantienen los mismos protocolos de cifrado AEAD y firmas digitales mencionadas en el punto de la integridad y autenticidad, al hacer uso de esto en caso de cualquier desastre la restauración no compromete a nuestro sistema pues se podrán retomar las operaciones sobre una base de datos integra y verificada.
 
-
 La revocación de accesos en tiempo real ocurre cuando a un usuario se le retiran los privilegios de entrada y se le invalida la capacidad de interacción con las llaves de forma inmediata, si ocurre esto el usuario ya no podrá descifrar nuevos documentos ni intercambiar información dentro del canal. Esto se logra mediante la actualización de las listas y el cifrado de las llaves simétricas, generando que el acceso a la información esté actualizado con los permisos vigentes y logrando que se evite la fuga de datos por credenciales obsoletas o revocadas.
 
 ### Manejo de llaves
@@ -54,11 +53,10 @@ Se implementan mecanismos de verificación de integridad de metadatos, diseñado
 
 ## 4. Modelo de amenaza
 
-**Versión de Aplicación:** 0.3
+**Versión de Aplicación:** 2.1.3
 
 **Descripción:** La bóveda digital es provee a de un lugar donde almacenar y compartir sus documentos personales. Como esta es la primera implementación del servicio, la funcionalidad será limitada. Se tienen en cuenta los siguientes tipos de usuario:
 
-- Administrador del sistema
 - Usuario Propietario 
 - Usuario Receptor
 
@@ -107,7 +105,6 @@ El acrónimo STRIDE desglosado significa, (S) Suplantación de identidad, (T) Ma
 - Se asume que el equipo del usuario no ha sido comprometido a nivel de root o del kernel por un atacante persistente.
 - Cualquier mecanismo de backup se realiza en formato cifrado y que el usuario protege el acceso a los respaldos que haya guardado.
 - La recuperación utiliza verificación para evitar que un atacante utilice el backup como vía de acceso.
-- En el almacenamiento remoto, se asume que puede fallar o negar servicio.
 - El servidor no debe ver texto plano o llaves privadas.
 - Se asume que el usuario establece correctamente el destinatario y no con un tercero no deseado.
 - El usuario no ejecuta malware con la posibilidad de tener acceso a teclado o pantalla, y robar contraseñas o información importante.
