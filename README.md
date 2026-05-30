@@ -44,7 +44,7 @@ El reporte de este modulo está disponible en:
 
 [Signatures and authentication](documentation/D5-SignaturesAndAuthentication/D5-SignaturesAndAuthentication.md)
 
-## Administración de llaves ( D5 )
+## Administración de llaves ( D6 )
 
 Para esta entrega se implemento un ciclo de vida para las llaves asimétricas utilizadas para compartir archivos, en conjunto a esto se implemento una serie de mecanismos para administrar de manera segura la generación y almacenamiento de las llaves privadas en un contenedor seguro mediante el uso de una función de derivación de llave (KDF).
 
