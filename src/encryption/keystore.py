@@ -203,7 +203,10 @@ def backup_keystore(user_dir: str, backup_dir: str):
 
     os.makedirs(backup_dir, exist_ok=True)
 
-    files = ["keystore.json", "profile.json", "public.pem"]
+    files = ["keystore.json", "public.pem"]
+
+    if (os.path.isfile(os.path.join(user_dir, "profile.json"))): 
+        files.append("profile.json")
 
     for file_name in files:
         src = os.path.join(user_dir, file_name)
@@ -222,6 +225,9 @@ def restore_keystore(backup_dir: str, user_dir: str):
 
     files = ["keystore.json", "public.pem"]
 
+    if (os.path.isfile(os.path.join(backup_dir, "profile.json"))): 
+        files.append("profile.json")
+    
     for file_name in files:
         src = os.path.join(backup_dir, file_name)
         dst = os.path.join(user_dir, file_name)

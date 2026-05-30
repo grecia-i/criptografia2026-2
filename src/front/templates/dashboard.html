@@ -634,7 +634,14 @@
                         <label>Confirmar contraseña actual para rotar</label>
                         <input type="password" id="rotate-pass" placeholder="••••••••">
                     </div>
-                    <button class="btn-primary" onclick="rotateUserKeys()" style="background: #ef4444; border:none;">
+                    <div id="password-prompt" hidden>
+                        <label>Ingresar nueva contraseña</label>
+                        <input type="password" id="new-password" placeholder="Nueva contraseña" tyle="margin-bottom: 0.75rem;">
+                        <label>Confirmar nueva contraseña</label>
+                        <input type="password" id="confirm-password" placeholder="Confirmar contraseña" style="margin-bottom: 0.75rem;">
+                        <button class="btn-primary" onclick="rotateUserKeys()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-bottom: 1.5rem;">Continue</button>
+                    </div>
+                    <button class="btn-primary" onclick="promptUser()" style="background: #ef4444; border:none;">
                         Rotar Par de Llaves
                     </button>
                     <button class="btn-primary" onclick="backupUser()" style="margin-top: 1rem;">
@@ -894,6 +901,32 @@
         function descargarZipBuzon(containerName) {
             console.log("Descargando:", containerName); 
             window.location.href = `/api/download_zip/${containerName}`;
+        }
+
+        function promptUser() {
+            const prompt = document.getElementById('password-prompt').hidden = false;
+        }
+
+        function rotateUserKeys() { 
+            const password = document.getElementById('rotate-pass').value;
+            const new_password = document.getElementById('new-password').value;
+            const confirm_password = document.getElementById('confirm-password').value;
+
+            fetch('api/rotate-keys', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: usuarioActivo, password: password,
+                    new_password: new_password, confirm_password: confirm_password
+                })
+            })
+            .then(res => res.json())
+            .then(data => { 
+                alert(data.message);
+            })
+            .then(result => { 
+                document.getElementById('password-prompt').hidden = true; 
+            })
+            .catch(() => alert("Error al rotar llaves."));
         }
 
         function backupUser() {

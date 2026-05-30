@@ -5,15 +5,18 @@ import re
 import json
 import secrets
 import shutil
-from src.encryption.keystore import create_keystore, load_keystore, backup_keystore, restore_keystore
+import logging
+from datetime import datetime, timezone
+from src.encryption.keystore import (create_keystore, load_keystore, 
+                                     retire_keystore, backup_keystore, restore_keystore)
 from flask import Flask, render_template, jsonify, request, send_file, after_this_request
 from werkzeug.exceptions import RequestEntityTooLarge
 from src.encryption.keys import generate_key_pair, store_public_key, load_public_key, get_key_id
-from src.encryption.keystore import create_keystore, load_keystore
 from src.encryption.encrypt import encrypt_file
 from src.encryption.decrypt import decrypt_container
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+app.logger.setLevel(logging.DEBUG)
 app.config['MAX_CONTENT_LENGTH'] = 20*1024*1024 #20Mb
 
 # Configuración de rutas
@@ -110,8 +113,7 @@ def encrypt():
     except Exception as e:
         if os.path.exists(vault_dir): shutil.rmtree(vault_dir)
         if os.path.exists(zip_path):  os.remove(zip_path)
-        print(f"ERROR encrypt: {e}")
-        return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 401
+        return jsonify({"status": "error", "message": "No se pudo cifrar. Verifique su clave."}), 401
 
     finally:
         if os.path.exists(temp_path): os.remove(temp_path)
@@ -242,23 +244,51 @@ def get_keys_status():
     return jsonify(status)
 
 @app.route('/api/rotate-keys', methods=['POST'])
-def rotate_keys():
+def rotate_keys_gui():
     data = request.get_json()
     username = data.get('username', '').lower().strip()
     password = data.get('password') # Usamos la contraseña actual para autorizar la rotación
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
+
+    if not new_password or not confirm_password:
+        return jsonify({"status": "error", "message": "Los campos no pueden estar vacíos."}), 400
+    
+    if new_password != confirm_password:
+        return jsonify({"status": "error", "message": "Las contraseñas nuevas no coinciden."}), 400
 
     user_dir = os.path.join(USERS_PATH, username)
     keystore_path = os.path.join(user_dir, "keystore.json")
-    pubkey_path = os.path.join(user_dir, "public.pem")
 
     try:
         load_keystore(keystore_path, password)
-        priv, pub = generate_key_pair()
-        create_keystore(priv, password, keystore_path, get_key_id(pub))
-        store_public_key(pub, pubkey_path)
+        retire_keystore(keystore_path)
+
+        backup_dir = os.path.join(
+            user_dir,
+            "archive","bk_" + datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+        )
+        backup_keystore(user_dir, backup_dir)
+
+        private_key, public_key = generate_key_pair()
+        key_id = get_key_id(public_key)
         
-        return jsonify({"status": "success", "message": "Llaves rotadas correctamente. Seguridad renovada."})
+        create_keystore(
+            private_key,
+            new_password,
+            keystore_path,
+            key_id
+        )
+
+        store_public_key(
+            public_key,
+            os.path.join(user_dir, "public.pem")
+        )
+
+        message = f"Llaves rotadas correctamente. Se ha creado un backup de tu llave anterior en: {backup_dir}"
+        return jsonify({"status": "success", "message": message})
     except Exception as e:
+        print(e)
         return jsonify({"status": "error", "message": "No se pudo rotar: verifica tu contraseña."}), 401
 
 @app.route('/api/backup-user', methods=['POST'])
