@@ -104,7 +104,7 @@ def main():
             if not os.path.isfile(args.input_file):
                 raise FileNotFoundError(f"Input file not found: {args.input_file}")
             
-            vault_container = os.path.join(VAULT_PATH, os.path.basename(args.input_file))
+            vault_container = os.path.join(VAULT_PATH, f"{os.path.basename(args.input_file)}_vault")
             if os.path.exists(vault_container):
                 raise FileExistsError(f"Vault container already exists: {vault_container}")
 

@@ -114,7 +114,6 @@ def encrypt():
         if os.path.exists(vault_dir): shutil.rmtree(vault_dir)
         if os.path.exists(zip_path):  os.remove(zip_path)
         return jsonify({"status": "error", "message": "No se pudo cifrar. Verifique su clave."}), 401
-
     finally:
         if os.path.exists(temp_path): os.remove(temp_path)
 
