@@ -154,8 +154,8 @@ def decrypt():
                 if os.path.exists(zip_path):    os.remove(zip_path)
                 if os.path.exists(extract_dir): shutil.rmtree(extract_dir)
                 if os.path.exists(out_path):    os.remove(out_path)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Error during cleanup: {e}")
             return response
 
         print(filename)
@@ -203,8 +203,9 @@ def get_usuarios():
                     try:
                         with open(profile_path, "r") as f:
                             nombre = json.load(f).get("nombre", d.capitalize())
-                    except:
-                        pass
+                    except Exception as e:
+                        print(f"Error leyendo profile.json de {d}: {e}")
+                        
                 
                 usuarios.append({
                     "username": d, 
@@ -375,5 +376,5 @@ def fileSize(e):
     return jsonify({"status": "error", "message": "El tamaño de archivo excede los 20 Mb."}), 413
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
 
