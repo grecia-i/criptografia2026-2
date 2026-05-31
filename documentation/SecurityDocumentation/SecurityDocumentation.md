@@ -344,7 +344,7 @@ Esto podía facilitar ataques de análisis de comportamiento.
 
 Se reemplazaron mensajes específicos por mensajes genéricos y se redujo la información mostrada durante errores y operaciones exitosas.
 
-### Unsafe File Handling
+### Manejo no seguro de archivos
 
 Se detectó que el sistema escribía archivos descifrados utilizando modo "wb", permitiendo sobrescribir archivos existentes.
 
