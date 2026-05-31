@@ -42,7 +42,7 @@ def aad_keystore(keystore):
         if key != "encrypted_key" and key != "status" and key != "retired_at":
             aad[key] = keystore[key]
     
-    return json.dumps(aad, sort_keys=True, separators=(',', ':')).encode(encoding='UTF-8')
+    return json.dumps(aad, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode(encoding='UTF-8')
 
 
 def create_keystore(private_key, password: str, keystore_path: str, key_id: str):
@@ -85,8 +85,8 @@ def create_keystore(private_key, password: str, keystore_path: str, key_id: str)
 
     keystore["encrypted_key"] = ciphertext.hex()
 
-    with open(keystore_path, "w") as f:
-        json.dump(keystore, f, separators=(',', ':'),indent=4)
+    with open(keystore_path, "w", encoding="utf-8" ) as f:
+        json.dump(keystore, f, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
 
 
 def load_keystore(keystore_path: str, password: str):
@@ -139,8 +139,8 @@ def revoke_keystore(keystore_path: str):
     keystore["status"] = "revoked"
     keystore["revoked_at"] = datetime.now(timezone.utc).isoformat()
 
-    with open(keystore_path, "w") as f:
-        json.dump(keystore, f, separators=(',', ':'),indent=4)
+    with open(keystore_path, "w", encoding="utf-8" ) as f:
+        json.dump(keystore, f, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
 
 def retire_keystore(keystore_path: str):
 
@@ -153,8 +153,8 @@ def retire_keystore(keystore_path: str):
     keystore["status"] = "retired"
     keystore["retired_at"] = datetime.now(timezone.utc).isoformat()
 
-    with open(keystore_path, "w") as f:
-        json.dump(keystore, f, separators=(',', ':'),indent=4)
+    with open(keystore_path, "w", encoding="utf-8" ) as f:
+        json.dump(keystore, f, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
 
 
 def rotate_keys( user_dir: str, old_password: str,
@@ -205,6 +205,9 @@ def backup_keystore(user_dir: str, backup_dir: str):
 
     files = ["keystore.json", "public.pem"]
 
+    if (os.path.isfile(os.path.join(user_dir, "profile.json"))): 
+        files.append("profile.json")
+
     for file_name in files:
         src = os.path.join(user_dir, file_name)
         dst = os.path.join(backup_dir, file_name)
@@ -222,6 +225,9 @@ def restore_keystore(backup_dir: str, user_dir: str):
 
     files = ["keystore.json", "public.pem"]
 
+    if (os.path.isfile(os.path.join(backup_dir, "profile.json"))): 
+        files.append("profile.json")
+    
     for file_name in files:
         src = os.path.join(backup_dir, file_name)
         dst = os.path.join(user_dir, file_name)
