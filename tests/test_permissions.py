@@ -22,7 +22,7 @@ def mock_env(tmp_path):
 def test_sharing_and_unauthorized_access(mock_env):
     tmp_path, users_path, vault_path = mock_env
     
-    with patch("getpass.getpass", return_value="examplepassword"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         create_user("Alice")
         create_user("Bob")
         create_user("Eve")
@@ -40,15 +40,15 @@ def test_sharing_and_unauthorized_access(mock_env):
     
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_sim
-        with patch("getpass.getpass", return_value="examplepassword"):
+        with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
             main()
 
-    vault_file = vault_path / "test.txt"
+    vault_file = vault_path / "test.txt_vault"
     assert vault_file.exists() # nosec
 
     # Alice can decrypt ? same who shared
     output_alice = tmp_path / "output_alice.txt"
-    with patch("getpass.getpass", return_value="examplepassword"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         decrypt_alice = MagicMock(
             command="decrypt",
             container_dir=str(vault_file),
@@ -63,7 +63,7 @@ def test_sharing_and_unauthorized_access(mock_env):
 
     # Bob can decrypt ? the one it was shared to
     output_bob = tmp_path / "output_bob.txt"
-    with patch("getpass.getpass", return_value="examplepassword"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         decrypt_bob = MagicMock(
             command="decrypt",
             container_dir=str(vault_file),
@@ -72,14 +72,14 @@ def test_sharing_and_unauthorized_access(mock_env):
         )
         with patch("src.main.build_parser") as mock_p:
             mock_p.return_value.parse_args.return_value = decrypt_bob
-            with patch("getpass.getpass", return_value="examplepassword"):
+            with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
                 main()
 
     assert output_bob.read_text() == content # nosec
 
     # Eve shouldn't decrypt
     output_eve = tmp_path / "output_eve.txt"
-    with patch("getpass.getpass", return_value="examplepassword"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         decrypt_args = MagicMock(
             command="decrypt",
             container_dir=str(vault_file),
@@ -95,7 +95,7 @@ def test_sharing_and_unauthorized_access(mock_env):
 def test_wrong_password_cannot_decrypt(mock_env):
     tmp_path, users_path, vault_path = mock_env
 
-    with patch("getpass.getpass", return_value="correctpassword"):
+    with patch("getpass.getpass", return_value="C0rr3ctP4ssw0rd!"):
         create_user("Alice")
 
     content = "sensitive data 123"
@@ -107,14 +107,14 @@ def test_wrong_password_cannot_decrypt(mock_env):
         to=["Alice"],
         sender="Alice"
     )
-    with patch("getpass.getpass", return_value="correctpassword"), \
+    with patch("getpass.getpass", return_value="C0rr3ctP4ssw0rd!"), \
          patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_args
         
-        with patch("getpass.getpass", return_value="correctpassword"):
+        with patch("getpass.getpass", return_value="C0rr3ctP4ssw0rd!"):
             main()
 
-    vault_file = vault_path / "secret.txt"
+    vault_file = vault_path / "secret.txt_vault"
     assert vault_file.exists() # nosec
 
     output_file = tmp_path / "output_alice.txt"

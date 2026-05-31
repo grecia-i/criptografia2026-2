@@ -26,7 +26,7 @@ def mock_env(tmp_path):
 
 
 def create_signed_container(tmp_path, users_path, vault_path, create_eve=False):
-    with patch("getpass.getpass", return_value="examplepassword"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         create_user("Alice")
         create_user("Bob")
 
@@ -46,10 +46,10 @@ def create_signed_container(tmp_path, users_path, vault_path, create_eve=False):
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_args
 
-        with patch("getpass.getpass", return_value="examplepassword"):
+        with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
             main()
 
-    vault_file = vault_path / "test.txt"
+    vault_file = vault_path / "test.txt_vault"
     assert vault_file.exists()  # nosec
 
     return vault_file
@@ -60,7 +60,7 @@ def get_bob_decryption_data(users_path, tmp_path):
 
     private_key = load_keystore(
         bob_path / "keystore.json",
-        "examplepassword"
+        "Ex4mpl3P4ssw0rd!"
     )
 
     public_key = load_public_key(

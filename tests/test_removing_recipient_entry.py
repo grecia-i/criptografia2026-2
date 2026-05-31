@@ -20,7 +20,7 @@ def test_removing_recipient_entry_breaks_access(mock_env):
     tmp_path, users_path, vault_path = mock_env
 
     # Crear usuarios
-    with patch("getpass.getpass", return_value="1234"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         create_user("Alice")
         create_user("Bob")
 
@@ -39,10 +39,10 @@ def test_removing_recipient_entry_breaks_access(mock_env):
 
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_args
-        with patch("getpass.getpass", return_value="1234"):
+        with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
                 main()
 
-    container_dir = vault_path / "mensaje.txt"
+    container_dir = vault_path / "mensaje.txt_vault"
     assert container_dir.exists()  # nosec
 
     # Abrir y alterar header.json quitando a Bob
@@ -67,7 +67,7 @@ def test_removing_recipient_entry_breaks_access(mock_env):
         user="Bob"
     )
 
-    with patch("getpass.getpass", return_value="1234"), \
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"), \
          patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = decrypt_args
         with pytest.raises(Exception):

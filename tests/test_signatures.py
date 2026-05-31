@@ -24,7 +24,7 @@ def mock_env(tmp_path):
 def test_signature_and_tampering(mock_env):
     tmp_path, users_path, vault_path = mock_env
     
-    with patch("getpass.getpass", return_value="examplepassword"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         create_user("Alice")
         create_user("Bob")
         create_user("Eve")
@@ -43,15 +43,15 @@ def test_signature_and_tampering(mock_env):
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_sim
         
-        with patch("getpass.getpass", return_value="examplepassword"):
+        with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
             main()
 
-    vault_file = vault_path / "test.txt"
+    vault_file = vault_path / "test.txt_vault"
     assert vault_file.exists() # nosec
 
     output_test1 = tmp_path / "output_test1.txt"
     keypair_path = users_path / "Bob" 
-    private_key = load_keystore(keypair_path / "keystore.json", "examplepassword")
+    private_key = load_keystore(keypair_path / "keystore.json", "Ex4mpl3P4ssw0rd!")
     pub_key = load_public_key(keypair_path / "public.pem")
     my_id = get_key_id(pub_key)  
 

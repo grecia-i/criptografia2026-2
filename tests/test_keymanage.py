@@ -26,7 +26,7 @@ def mock_env(tmp_path):
 def test_correct_password_dec(mock_env):
     tmp_path, users_path, vault_path = mock_env
     
-    with patch("getpass.getpass", return_value="examplepassword"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         create_user("Alice")
         create_user("Bob")
 
@@ -43,10 +43,10 @@ def test_correct_password_dec(mock_env):
     
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_sim
-        with patch("getpass.getpass", return_value="examplepassword"):
+        with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
             main()
 
-    vault_file = vault_path / "test.txt"
+    vault_file = vault_path / "test.txt_vault"
     assert vault_file.exists() # nosec
 
     # Passing a wrong password
@@ -67,7 +67,7 @@ def test_correct_password_dec(mock_env):
 def test_keystore_tampering(mock_env):
     tmp_path, users_path, vault_path = mock_env
     
-    with patch("getpass.getpass", return_value="examplepassword"):
+    with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
         create_user("Alice")
         create_user("Bob")
 
@@ -85,14 +85,14 @@ def test_keystore_tampering(mock_env):
     with patch("src.main.build_parser") as mock_parser:
         mock_parser.return_value.parse_args.return_value = encrypt_sim
         
-        with patch("getpass.getpass", return_value="examplepassword"):
+        with patch("getpass.getpass", return_value="Ex4mpl3P4ssw0rd!"):
             main()
 
     vault_file = vault_path / "test.txt"
 
     output_test = tmp_path / "output_test.txt"
     keypair_path = users_path / "Bob" 
-    private_key = load_keystore(keypair_path / "keystore.json", "examplepassword")
+    private_key = load_keystore(keypair_path / "keystore.json", "Ex4mpl3P4ssw0rd!")
     pub_key = load_public_key(keypair_path / "public.pem")
     my_id = get_key_id(pub_key) 
 
@@ -107,5 +107,5 @@ def test_keystore_tampering(mock_env):
         f.truncate()
 
     with pytest.raises(ValueError) as tampering:
-        load_keystore(keystore_path, "examplepassword")
+        load_keystore(keystore_path, "Ex4mpl3P4ssw0rd!")
     assert "Decryption failed: container may have been tampered with" in str(tampering.value) # nosec
