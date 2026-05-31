@@ -108,7 +108,36 @@ Las decisiones criptográficas fueron tomadas buscando mantener confidencialidad
 - Uso de nonces aleatorios
 - El nonce también se protege dentro de los datos autenticados y de la firma digital, permitiendo detectar cualquier modificación antes de descifrar el archivo.
 
-### Cifrado híbrido mediante RSA-OAEP 
+## Firmas digitales mediante RSA-PSS
+
+Las firmas digitales se implementan mediante RSA-PSS con SHA-256.
+La firma se calcula sobre:
+
+- Metadata canonicalizada.
+- Nonce.
+- Ciphertext.
+
+La verificación ocurre antes del descifrado, permitiendo detectar contenedores alterados antes de procesar información sensible.
+
+## Uso de SHA-256
+
+SHA-256 se utiliza como función hash principal dentro del sistema para:
+
+- RSA-OAEP.
+- RSA-PSS.
+- Generación de identificadores de llaves públicas.
+
+## Formato de serialización
+
+Las llaves privadas no se almacenan en texto plano. Cada llave privada se serializa y posteriormente se protege dentro de un archivo keystore.json.
+
+La llave de cifrado del keystore se deriva a partir de la contraseña del usuario utilizando Argon2id, seleccionado debido a su resistencia frente a ataques de fuerza bruta y ataques acelerados por GPU.
+
+Posteriormente, la llave privada se cifra utilizando AES-GCM.
+
+## Modelo fail-closed
+
+El sistema implementa un modelo fail-closed. Ante cualquier error de validación, autenticación o integridad, el proceso se detiene y no se entrega el archivo original.
 
 
 
