@@ -90,6 +90,10 @@ with open(keystore_path, "w", encoding="utf-8") as f:
 
 ## Key management strategy
 
+Se implementó un ciclo de vida para las llaves asimétricas utilizadas para compartir archivos, en conjunto a esto se implemento una serie de mecanismos para administrar de manera segura la generación y almacenamiento de las llaves privadas en un contenedor seguro mediante el uso de una función de derivación de llave (KDF).
 
+El desglose está disponible en:
+
+[Key Management](../D6-KeyManagement/D6-KeyManagement.md)
 
 ## Security audit findings
