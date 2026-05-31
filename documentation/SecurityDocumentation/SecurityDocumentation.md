@@ -54,9 +54,6 @@ El receptor debe poder verificar la identidad del emisor mediante firmas digital
 
 Únicamente los usuarios autorizados pueden descifrar el contenedor.
 
-#### Fail-Closed Behavior
-
- Ante cualquier evidencia de manipulación o error de validación, el sistema debe detener la operación sin exponer información sensible.
 
 ### Amenazas consideradas
 
@@ -211,3 +208,160 @@ El desglose está disponible en:
 [Key Management](../D6-KeyManagement/D6-KeyManagement.md)
 
 ## Security audit findings
+
+Durante el desarrollo del proyecto se realizaron múltiples pruebas de auditoría de seguridad con el objetivo de evaluar el comportamiento del sistema ante modificaciones maliciosas sobre los contenedores cifrados y detectar posibles debilidades de implementación.
+
+Las pruebas se enfocaron principalmente en manipulación de metadata, nonces, firmas digitales, recipient lists, identificadores de llaves y manejo de errores. A partir de estas pruebas se identificaron distintas consideraciones de seguridad y se aplicaron correcciones orientadas a fortalecer el comportamiento fail-closed del sistema.
+
+### Manipulación de metadata
+
+Se realizaron pruebas modificando manualmente el archivo header.json del contenedor cifrado, alterando campos como identificadores de usuarios, tamaño de archivo y recipient lists.
+
+#### Comportamiento observado
+
+El sistema detectó correctamente las modificaciones y bloqueó el proceso de descifrado. La validación criptográfica impidió que los metadatos alterados fueran aceptados como válidos.
+
+#### Impacto en seguridad
+
+La modificación de metadata afecta principalmente:
+
+- Integridad.
+- Control de acceso.
+
+Si estas modificaciones no fueran detectadas, un atacante podría alterar destinatarios autorizados o modificar información crítica del contenedor.
+
+#### Mitigación implementada
+
+La metadata fue protegida mediante:
+
+- Canonicalización JSON determinística.
+- Inclusión dentro del AAD de AES-GCM.
+- Inclusión dentro de la firma digital.
+
+ ### Validación incompleta del nonce
+
+Durante la auditoría se identificó que inicialmente el nonce no formaba parte de todos los elementos autenticados del contenedor.
+
+#### Comportamiento observado
+
+Al modificar el archivo nonce, el sistema fallaba durante el descifrado mediante una excepción InvalidTag. Aunque el sistema fallaba de forma segura, el nonce no estaba siendo autenticado explícitamente dentro de la firma digital.
+
+#### Impacto en seguridad
+
+Esta situación representaba una validación incompleta del contenedor y permitía provocar fallos de descifrado mediante manipulación del nonce, generando posibles escenarios de denegación de servicio.
+
+#### Severidad
+
+Media.
+
+#### Mitigación implementada
+
+Se modificó el sistema para:
+
+- Incluir el nonce dentro del AAD.
+- Incluir el nonce dentro de los datos firmados digitalmente.
+- Validar integridad del nonce antes del descifrado.
+
+Con esto se garantiza autenticidad e integridad sobre todos los elementos críticos del contenedor.
+
+### Eliminación o modificación de firma digital
+
+Se realizaron pruebas eliminando o alterando el archivo signature dentro del vault container.
+
+#### Comportamiento observado
+
+El sistema rechazó inmediatamente el contenedor al detectar que faltaba un archivo obligatorio o que la firma digital no coincidía con los datos originales.
+
+El proceso de descifrado nunca continuó después de la falla de verificación.
+
+#### Impacto en seguridad
+
+La eliminación o alteración de la firma compromete:
+
+- Integridad.
+- Autenticidad.
+
+Sin la firma digital, no sería posible verificar si el contenido fue modificado o confirmar la identidad del emisor.
+
+#### Severidad
+
+Alta.
+
+#### Mitigación implementada
+
+El sistema:
+
+- Verifica obligatoriamente la firma antes del descifrado.
+- Valida la existencia de todos los archivos críticos.
+- Detiene el proceso ante cualquier inconsistencia.
+
+### Modificación de identificadores de llaves
+
+Se modificaron manualmente identificadores de llaves públicas dentro de los metadatos del contenedor para intentar asociar destinatarios no autorizados.
+
+#### Comportamiento observado
+
+El sistema rechazó correctamente el contenedor y evitó que usuarios no autorizados completaran el proceso de autenticación.
+
+Sin embargo, inicialmente algunos mensajes de error revelaban detalles internos del proceso de validación.
+
+#### Impacto en seguridad
+
+Aunque el ataque no comprometía directamente el cifrado, sí permitía inferir parte de la lógica interna del sistema mediante análisis de mensajes de error.
+
+#### Severidad
+
+Media.
+
+#### Mitigación implementada
+
+Se realizaron cambios en el flujo de validación:
+
+- Primero se valida integridad criptográfica.
+- Después se validan destinatarios.
+- Los mensajes específicos fueron reemplazados por errores genéricos.
+
+Actualmente el sistema responde únicamente con mensajes generales como: “Decryption failed: invalid or tampered container”.
+
+Esto reduce filtración de información sobre validaciones internas.
+
+### Mensajes de error
+
+Durante las pruebas se identificó que algunos mensajes mostraban demasiada información sobre el funcionamiento interno del sistema.
+
+#### Comportamiento observado
+
+El sistema indicaba explícitamente:
+
+- Qué validación había fallado.
+- Qué usuario no estaba autorizado.
+- Qué parte del contenedor presentaba problemas.
+- Impacto en seguridad
+
+Esto podía facilitar ataques de análisis de comportamiento.
+
+#### Mitigación implementada
+
+Se reemplazaron mensajes específicos por mensajes genéricos y se redujo la información mostrada durante errores y operaciones exitosas.
+
+### Unsafe File Handling
+
+Se detectó que el sistema escribía archivos descifrados utilizando modo "wb", permitiendo sobrescribir archivos existentes.
+
+#### Impacto en seguridad
+
+Esto representaba una debilidad de validación de entrada y manejo inseguro de archivos.
+
+#### Mitigación implementada
+
+Se agregó validación previa sobre la ruta de salida y se reemplazó el modo "wb" por "xb", evitando sobrescritura accidental de archivos existentes.
+
+#### Impacto en seguridad
+
+Un atacante podría intentar cifrar archivos extremadamente grandes para consumir memoria RAM y provocar un Denial of Service (DoS).
+
+#### Mitigación implementada
+
+Se identificó esta consideración como una mejora futura de endurecimiento del sistema.
+
+
