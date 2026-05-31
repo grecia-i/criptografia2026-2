@@ -59,10 +59,58 @@ El receptor debe poder verificar la identidad del emisor mediante firmas digital
  Ante cualquier evidencia de manipulación o error de validación, el sistema debe detener la operación sin exponer información sensible.
 
 ### Amenazas consideradas
+
+Las principales amenazas consideradas durante el diseño del sistema fueron:
+
+- Manipulación de metadata.
+- Alteración de recipient lists.
+- Modificación de nonces.
+- Eliminación o modificación de firmas digitales.
+- Sustitución de identificadores de llaves públicas.
+- Robo de keystores.
+- Fuerza bruta sobre contraseñas.
+- Filtración de información mediante mensajes de error.
+- Procesamiento de contenedores alterados.
+
 ### Estrategias de mitigación
+
+Para reducir estas amenazas, el sistema implementa:
+
+- Cifrado autenticado AES-256-GCM.
+- Firmas digitales RSA-PSS.
+- Cifrado híbrido mediante RSA-OAEP.
+- Canonicalización determinística de metadata.
+- Verificación de firma antes del descifrado.
+- Protección de metadata mediante AAD.
+- Protección de llaves privadas con Argon2id y AES-GCM.
+- Validaciones fail-closed.
+- Uso de mensajes de error genéricos.
+- Rotación y revocación de llaves.
+
 ### Fuera del alcance
 
+Los siguientes escenarios se consideran fuera del alcance del proyecto:
+
+- Compromiso total del sistema operativo.
+- Malware ejecutándose con privilegios del usuario.
+- Ataques físicos al hardware.
+- Infraestructura multifactor.
+Sincronización segura en la nube.
+
+
 ## Cryptographic design decisions
+
+Las decisiones criptográficas fueron tomadas buscando mantener confidencialidad, integridad, autenticidad y compatibilidad entre componentes.
+
+- El contenido de los archivos se cifra utilizando AES-256-GCM. Este algoritmo fue seleccionado debido a que proporciona cifrado autenticado (AEAD), permitiendo proteger simultáneamente la confidencialidad e integridad del contenido.
+- AES-GCM permite además autenticar datos adicionales sin cifrarlos directamente mediante el uso de AAD (Additional Authenticated Data). Esto resulta útil para proteger metadata crítica del contenedor.
+- Para cada archivo se genera una llave única y aleatoria de 256 bits para evitar reutilizar la misma llave en diferentes contenedores.
+- Uso de nonces aleatorios
+- El nonce también se protege dentro de los datos autenticados y de la firma digital, permitiendo detectar cualquier modificación antes de descifrar el archivo.
+
+### Cifrado híbrido mediante RSA-OAEP 
+
+
 
 ## Canonicalization strategy
 
