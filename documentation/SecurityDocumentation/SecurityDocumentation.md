@@ -12,14 +12,51 @@ Contribuyentes:
 El sistema fue diseñado para proteger archivos digitales confidenciales mediante mecanismos de cifrado híbrido autenticado, firmas digitales y almacenamiento seguro de llaves criptográficas. El objetivo principal del sistema es preservar la confidencialidad, integridad, autenticidad y control de acceso sobre la información protegida.
 
 ### Activos protegidos
+
+El sistema protege los siguientes activos:
+
+- Archivos digitales cifrados almacenados dentro de los contenedores de la bóveda.
+- Llaves privadas RSA pertenecientes a usuarios registrados.
+- Llaves de sesión utilizadas durante el cifrado híbrido.
+- Metadata asociada al contenedor cifrado.
+- Firmas digitales utilizadas para verificar autenticidad.
+. Respaldos de keystores.
+  
 ### Actores de amenaza
+
+El modelo de amenazas considera atacantes con capacidad para:
+
+- Obtener acceso a contenedores cifrados.
+- Modificar archivos dentro del vault container.
+- Alterar metadatos o listas de destinatarios.
+- Modificar nonces o firmas digitales.
+- Intentar descifrar contenedores sin autorización.
+- Robar archivos keystore.json.
+- Realizar ataques de fuerza bruta sobre contraseñas.
+
+También se considera que un atacante podría tener acceso al sistema de archivos donde se almacenan los contenedores cifrados, sin poseer inicialmente la contraseña ni la llave privada del usuario legítimo.
+
 ### Objetivos de seguridad
 
 #### Confidencialidad
+
+Solo los usuarios autorizados deben poder recuperar el contenido original de los archivos cifrados.
+
 #### Integridad
+
+Cualquier modificación al ciphertext, metadata, nonce, lista de destinatarios o firmas digitales debe ser detectada antes del descifrado.
+
 #### Autenticidad
+
+El receptor debe poder verificar la identidad del emisor mediante firmas digitales.
+
 #### Control de acceso
+
+Únicamente los usuarios autorizados pueden descifrar el contenedor.
+
 #### Fail-Closed Behavior
+
+ Ante cualquier evidencia de manipulación o error de validación, el sistema debe detener la operación sin exponer información sensible.
 
 ### Amenazas consideradas
 ### Estrategias de mitigación
